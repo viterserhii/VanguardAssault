@@ -7,18 +7,26 @@
 #include "Components/SceneComponent.h"
 #include "TurretPawn.generated.h"
 
+UENUM(BlueprintType)
+enum class ETeamColor : uint8
+{
+    GreenTeam UMETA(DisplayName = "Green"),
+    RedTeam   UMETA(DisplayName = "Red"),
+};
+
 UCLASS()
 class VANGUARDASSAULT_API ATurretPawn : public APawn
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	ATurretPawn();
+    ATurretPawn();
 
 protected:
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
+    virtual void PostInitializeComponents() override;
 
-public:	
+public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     UCapsuleComponent* CapsuleComponent;
 
@@ -31,4 +39,10 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     USceneComponent* ProjectileSpawnPoint;
 
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Materials")
+    ETeamColor TeamColor;
+
+private:
+    void UpdateMaterialColor(UStaticMeshComponent* Mesh, int32 MaterialSlot);
+    FLinearColor GetColorForTeam(ETeamColor Team) const;
 };
