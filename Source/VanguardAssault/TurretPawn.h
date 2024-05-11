@@ -10,8 +10,8 @@
 UENUM(BlueprintType)
 enum class ETeamColor : uint8
 {
-    GreenTeam UMETA(DisplayName = "Green"),
-    RedTeam   UMETA(DisplayName = "Red"),
+    GreenTeam UMETA(DisplayName = "GreenTeam"),
+    RedTeam   UMETA(DisplayName = "RedTeam"),
 };
 
 UCLASS()
