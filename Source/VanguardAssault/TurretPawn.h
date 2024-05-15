@@ -36,6 +36,10 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     UStaticMeshComponent* TurretMesh;
 
+    UPROPERTY(EditAnywhere, Category = "Turret")
+    float RotationSpeed = 5.0f; // Ўвидк≥сть повороту турел≥ в градусах за секунду
+    void RotateTurret(FVector TargetDirection);
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     USceneComponent* ProjectileSpawnPoint;
 

@@ -7,6 +7,11 @@ ATurretPawn::ATurretPawn()
     CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComponent"));
     RootComponent = CapsuleComponent;
 
+    CapsuleComponent->InitCapsuleSize(22.0f, 44.0f);
+
+    CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    CapsuleComponent->SetCollisionProfileName(TEXT("Pawn"));
+
     BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseMesh"));
     BaseMesh->SetupAttachment(RootComponent);
 
@@ -38,6 +43,22 @@ void ATurretPawn::UpdateMaterialColor(UStaticMeshComponent* Mesh, int32 Material
         DynamicMaterial->SetVectorParameterValue(TEXT("TeamColor"), Color);
     }
 }
+
+void ATurretPawn::RotateTurret(FVector TargetDirection)
+{
+    if (!TurretMesh) return; // Перевірка, чи існує компонент TurretMesh
+
+    // Отримання поточного повороту турелі
+    FRotator CurrentRotation = TurretMesh->GetComponentRotation();
+    // Отримання цільового повороту на основі напрямку
+    FRotator TargetRotation = FRotationMatrix::MakeFromX(TargetDirection).Rotator();
+    // Плавний поворот до цільового повороту
+    FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, GetWorld()->DeltaTimeSeconds, RotationSpeed);
+
+    // Застосування нового повороту до турелі
+    TurretMesh->SetWorldRotation(NewRotation);
+}
+
 
 FLinearColor ATurretPawn::GetColorForTeam(ETeamColor Team) const
 {

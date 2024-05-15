@@ -18,14 +18,20 @@ public:
 protected:
     virtual void BeginPlay() override;
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+    virtual void Tick(float DeltaTime) override;
 
     void MoveForward(float Value);
     void TurnRight(float Value);
     void Fire();
+    void AimTowardsCursor();
 
 private:
     UPROPERTY(VisibleAnywhere, Category = "Movement")
     UFloatingPawnMovement* MovementComponent;
+
+    UPROPERTY(EditAnywhere, Category = "Movement")
+    float AccelerationDuration = 3.0f;
+    float CurrentAcceleration = 0.0f;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
     USpringArmComponent* SpringArm;
