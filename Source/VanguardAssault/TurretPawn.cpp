@@ -46,16 +46,10 @@ void ATurretPawn::UpdateMaterialColor(UStaticMeshComponent* Mesh, int32 Material
 
 void ATurretPawn::RotateTurret(FVector TargetDirection)
 {
-    if (!TurretMesh) return; // Перевірка, чи існує компонент TurretMesh
-
-    // Отримання поточного повороту турелі
     FRotator CurrentRotation = TurretMesh->GetComponentRotation();
-    // Отримання цільового повороту на основі напрямку
     FRotator TargetRotation = FRotationMatrix::MakeFromX(TargetDirection).Rotator();
-    // Плавний поворот до цільового повороту
     FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, GetWorld()->DeltaTimeSeconds, RotationSpeed);
 
-    // Застосування нового повороту до турелі
     TurretMesh->SetWorldRotation(NewRotation);
 }
 
