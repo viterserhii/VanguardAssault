@@ -37,7 +37,7 @@ public:
     UStaticMeshComponent* TurretMesh;
 
     UPROPERTY(EditAnywhere, Category = "Turret")
-    float RotationSpeed = 5.0f;
+    float RotationSpeed = 1.0f;
     void RotateTurret(FVector TargetDirection);
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")

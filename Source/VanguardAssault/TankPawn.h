@@ -23,7 +23,7 @@ protected:
     void MoveForward(float Value);
     void TurnRight(float Value);
     void Fire();
-    void AimTowardsCursor();
+    void AimTowardsMousePosition();
 
 private:
     UPROPERTY(VisibleAnywhere, Category = "Movement")

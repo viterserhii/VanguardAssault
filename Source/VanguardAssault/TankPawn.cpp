@@ -30,7 +30,7 @@ void ATankPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void ATankPawn::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-    AimTowardsCursor();
+    AimTowardsMousePosition();
 }
 
 void ATankPawn::MoveForward(float Value)
@@ -59,25 +59,32 @@ void ATankPawn::Fire()
 
 }
 
-void ATankPawn::AimTowardsCursor()
+void ATankPawn::AimTowardsMousePosition()
 {
-    FHitResult HitResult;
+    float MouseX, MouseY;
     APlayerController* PlayerController = Cast<APlayerController>(GetController());
 
-    if (PlayerController && PlayerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, HitResult))
+    if (PlayerController && PlayerController->GetMousePosition(MouseX, MouseY))
     {
-        if (HitResult.bBlockingHit)
+        FVector WorldLocation, WorldDirection;
+        if (PlayerController->DeprojectScreenPositionToWorld(MouseX, MouseY, WorldLocation, WorldDirection))
         {
-            FVector HitLocation = HitResult.ImpactPoint;
-            FVector Direction = HitLocation - TurretMesh->GetComponentLocation();
-            Direction.Z = 0;
+            FVector StartLocation = WorldLocation;
+            FVector EndLocation = StartLocation + WorldDirection * 10000;
 
-            //this shit needs to be turned 90 degrees to the left
-            Direction = Direction.RotateAngleAxis(-90.0f, FVector(0.0f, 0.0f, 1.0f));
+            FHitResult HitResult;
+            if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility))
+            {
+                FVector HitLocation = HitResult.ImpactPoint;
+                FVector Direction = HitLocation - TurretMesh->GetComponentLocation();
+                Direction.Z = 0; 
 
-            RotateTurret(Direction);
+                Direction = Direction.RotateAngleAxis(-90.0f, FVector(0.0f, 0.0f, 1.0f));
 
-            DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 32.0f, 12, FColor::Red, false, -1.0f, 0, 2.0f);
+                RotateTurret(Direction);
+
+                DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 32.0f, 12, FColor::Red, false, -1.0f, 0, 2.0f);
+            }
         }
     }
 }
