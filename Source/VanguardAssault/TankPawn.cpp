@@ -56,7 +56,17 @@ void ATankPawn::TurnRight(float Value)
 
 void ATankPawn::Fire()
 {
+    if (ProjectileClass)
+    {
+        FVector SpawnLocation = ProjectileSpawnPoint->GetComponentLocation();
+        FRotator SpawnRotation = ProjectileSpawnPoint->GetComponentRotation();
 
+        FActorSpawnParameters SpawnParams;
+        SpawnParams.Owner = this;
+        SpawnParams.Instigator = GetInstigator();
+
+        AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+    }
 }
 
 void ATankPawn::AimTowardsMousePosition()
@@ -83,7 +93,7 @@ void ATankPawn::AimTowardsMousePosition()
 
                 RotateTurret(Direction);
 
-                DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 32.0f, 12, FColor::Red, false, -1.0f, 0, 2.0f);
+                DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 32.0f, 12, FColor::White, false, -1.0f, 0, 2.0f);
             }
         }
     }

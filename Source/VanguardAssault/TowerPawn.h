@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "TurretPawn.h"
+#include "Projectile.h"
 #include "Components/SphereComponent.h"
 #include "TankPawn.h"
 #include "TowerPawn.generated.h"
@@ -27,6 +28,9 @@ private:
 
     UPROPERTY(EditAnywhere, Category = "Combat")
     float UpdateInterval = 0.01f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+    TSubclassOf<AProjectile> ProjectileClass;
 
     UFUNCTION()
     void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,

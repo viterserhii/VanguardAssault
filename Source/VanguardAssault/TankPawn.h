@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "TurretPawn.h"
+#include "Projectile.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -17,12 +18,11 @@ public:
 
 protected:
     virtual void BeginPlay() override;
-    virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
     virtual void Tick(float DeltaTime) override;
+    virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
     void MoveForward(float Value);
     void TurnRight(float Value);
-    void Fire();
     void AimTowardsMousePosition();
 
 private:
@@ -30,7 +30,7 @@ private:
     UFloatingPawnMovement* MovementComponent;
 
     UPROPERTY(EditAnywhere, Category = "Movement")
-    float AccelerationDuration = 3.0f;
+    float AccelerationDuration = 2.0f;
     float CurrentAcceleration = 0.0f;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
@@ -38,4 +38,10 @@ private:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
     UCameraComponent* Camera;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+    TSubclassOf<class AProjectile> ProjectileClass;
+
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void Fire();
 };

@@ -54,6 +54,16 @@ void ATowerPawn::FireAtPlayer()
 {
     if (TargetActor)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Fire!"));
+        if (ProjectileClass)
+        {
+            FVector SpawnLocation = ProjectileSpawnPoint->GetComponentLocation();
+            FRotator SpawnRotation = ProjectileSpawnPoint->GetComponentRotation();
+
+            FActorSpawnParameters SpawnParams;
+            SpawnParams.Owner = this;
+            SpawnParams.Instigator = GetInstigator();
+
+            AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+        }
     }
 }
