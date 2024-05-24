@@ -23,6 +23,7 @@ AProjectile::AProjectile()
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+    SetLifeSpan(3.0f);
 }
 
 void AProjectile::Tick(float DeltaTime)
