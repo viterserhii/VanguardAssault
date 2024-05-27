@@ -1,6 +1,7 @@
 #include "Projectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include <Kismet/GameplayStatics.h>
 
 AProjectile::AProjectile()
 {
@@ -18,6 +19,8 @@ AProjectile::AProjectile()
     ProjectileMovement->MaxSpeed = 20000.f;
 
     ProjectileMesh->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+
+    Damage = 20.0f;
 }
 
 void AProjectile::BeginPlay()
@@ -34,8 +37,9 @@ void AProjectile::Tick(float DeltaTime)
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-    if (OtherActor && (OtherActor != this) && OtherComp)
+    if (OtherActor && OtherActor != this && OtherComp)
     {
+        UGameplayStatics::ApplyDamage(OtherActor, Damage, GetInstigatorController(), this, UDamageType::StaticClass());
         Destroy();
     }
 }

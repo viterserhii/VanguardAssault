@@ -20,6 +20,8 @@ ATurretPawn::ATurretPawn()
 
     ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("ProjectileSpawnPoint"));
     ProjectileSpawnPoint->SetupAttachment(TurretMesh);
+
+    HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 void ATurretPawn::Tick(float DeltaTime)
@@ -71,4 +73,9 @@ FLinearColor ATurretPawn::GetColorForTeam(ETeamColor Team) const
     default:
         return FLinearColor::White;
     }
+}
+
+void ATurretPawn::HandleDeath()
+{
+    Destroy();
 }

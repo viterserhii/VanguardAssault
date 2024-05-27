@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SceneComponent.h"
+#include "HealthComponent.h"
 #include "TurretPawn.generated.h"
 
 UENUM(BlueprintType)
@@ -46,6 +47,11 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Materials")
     ETeamColor TeamColor;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    UHealthComponent* HealthComponent;
+
+    void HandleDeath();
 
 private:
     void UpdateMaterialColor(UStaticMeshComponent* Mesh, int32 MaterialSlot);

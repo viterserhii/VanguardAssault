@@ -7,14 +7,16 @@
 UCLASS()
 class VANGUARDASSAULT_API AProjectile : public AActor
 {
-	GENERATED_BODY()
-	
-public:	
-	AProjectile();
+    GENERATED_BODY()
+
+public:
+    AProjectile();
 
 protected:
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
+    virtual void BeginPlay() override;
+
+public:
+    virtual void Tick(float DeltaTime) override;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     USceneComponent* RootSceneComponent;
@@ -24,6 +26,9 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     class UProjectileMovementComponent* ProjectileMovement;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+    float Damage;
 
     UFUNCTION()
     void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
