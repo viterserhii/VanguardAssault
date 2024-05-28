@@ -42,6 +42,15 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Projectile")
     TSubclassOf<class AProjectile> ProjectileClass;
 
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    float FireRate = 3.0f;
+
+    bool bCanFire = true;
+
+    FTimerHandle FireRateTimerHandle;
+
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void Fire();
+
+    void ResetFire();
 };

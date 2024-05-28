@@ -1,4 +1,7 @@
 #include "TankPawn.h"
+#include "GameFramework/Actor.h"
+#include "Engine/World.h"
+#include "TimerManager.h"
 
 ATankPawn::ATankPawn()
 {
@@ -56,7 +59,7 @@ void ATankPawn::TurnRight(float Value)
 
 void ATankPawn::Fire()
 {
-    if (ProjectileClass)
+    if (bCanFire && ProjectileClass)
     {
         FVector SpawnLocation = ProjectileSpawnPoint->GetComponentLocation();
         FRotator SpawnRotation = ProjectileSpawnPoint->GetComponentRotation();
@@ -66,7 +69,15 @@ void ATankPawn::Fire()
         SpawnParams.Instigator = GetInstigator();
 
         AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+
+        bCanFire = false;
+        GetWorld()->GetTimerManager().SetTimer(FireRateTimerHandle, this, &ATankPawn::ResetFire, FireRate, false);
     }
+}
+
+void ATankPawn::ResetFire()
+{
+    bCanFire = true;
 }
 
 void ATankPawn::AimTowardsMousePosition()
