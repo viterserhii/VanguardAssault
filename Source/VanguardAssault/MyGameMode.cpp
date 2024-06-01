@@ -10,6 +10,8 @@ AMyGameMode::AMyGameMode()
 {
     PrimaryActorTick.bCanEverTick = true;
     bIsGameOver = false;
+    bGameStarted = false;
+    CountdownTime = 10;
 }
 
 void AMyGameMode::BeginPlay()
@@ -17,6 +19,12 @@ void AMyGameMode::BeginPlay()
     Super::BeginPlay();
 
     PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+
+    ShowCountdownWidget();
+
+    DisablePlayerInput();
+
+    GetWorld()->GetTimerManager().SetTimer(CountdownTimerHandle, this, &AMyGameMode::UpdateCountdown, 1.0f, true);
 }
 
 void AMyGameMode::Tick(float DeltaTime)
@@ -25,6 +33,80 @@ void AMyGameMode::Tick(float DeltaTime)
 
     CheckWinCondition();
     CheckLoseCondition();
+}
+
+void AMyGameMode::ShowCountdownWidget()
+{
+    if (CountdownWidgetClass)
+    {
+        CountdownWidget = CreateWidget<UUserWidget>(GetWorld(), CountdownWidgetClass);
+        if (CountdownWidget)
+        {
+            CountdownWidget->AddToViewport();
+        }
+    }
+}
+
+void AMyGameMode::UpdateCountdown()
+{
+    if (CountdownTime <= 0)
+    {
+        HideCountdownWidget();
+        EnablePlayerInput();
+        GetWorld()->GetTimerManager().ClearTimer(CountdownTimerHandle);
+        return;
+    }
+
+    if (CountdownWidget)
+    {
+        UTextBlock* CountdownText = Cast<UTextBlock>(CountdownWidget->GetWidgetFromName("CountdownText"));
+        if (CountdownText)
+        {
+            CountdownText->SetText(FText::FromString(FString::FromInt(CountdownTime)));
+        }
+    }
+
+    CountdownTime--;
+}
+
+void AMyGameMode::HideCountdownWidget()
+{
+    if (CountdownWidget)
+    {
+        CountdownWidget->RemoveFromViewport();
+    }
+}
+
+void AMyGameMode::RestartGame()
+{
+    UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
+}
+
+void AMyGameMode::EnablePlayerInput()
+{
+    if (PlayerPawn)
+    {
+        APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+        if (PlayerController)
+        {
+            PlayerController->SetInputMode(FInputModeGameOnly());
+            PlayerController->bShowMouseCursor = false;
+            bGameStarted = true;
+        }
+    }
+}
+
+void AMyGameMode::DisablePlayerInput()
+{
+    if (PlayerPawn)
+    {
+        APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+        if (PlayerController)
+        {
+            PlayerController->SetInputMode(FInputModeUIOnly());
+            PlayerController->bShowMouseCursor = true;
+        }
+    }
 }
 
 void AMyGameMode::CheckWinCondition()
@@ -84,9 +166,4 @@ void AMyGameMode::ShowLoseWidget()
             LoseWidget->AddToViewport();
         }
     }
-}
-
-void AMyGameMode::RestartGame()
-{
-    UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
 }

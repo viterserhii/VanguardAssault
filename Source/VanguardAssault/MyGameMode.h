@@ -28,11 +28,17 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Game")
     void CheckLoseCondition();
 
+    UPROPERTY(BlueprintReadOnly, Category = "Game")
+    bool bGameStarted;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> WinWidgetClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> LoseWidgetClass;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> CountdownWidgetClass;
 
     UPROPERTY()
     UUserWidget* WinWidget;
@@ -40,12 +46,23 @@ public:
     UPROPERTY()
     UUserWidget* LoseWidget;
 
+    UPROPERTY()
+    UUserWidget* CountdownWidget;
+
 private:
     APawn* PlayerPawn;
 
     FTimerHandle RestartTimerHandle;
+    FTimerHandle CountdownTimerHandle;
+
+    int32 CountdownTime;
 
     void ShowWinWidget();
     void ShowLoseWidget();
+    void ShowCountdownWidget();
+    void UpdateCountdown();
+    void HideCountdownWidget();
     void RestartGame();
+    void EnablePlayerInput();
+    void DisablePlayerInput();
 };

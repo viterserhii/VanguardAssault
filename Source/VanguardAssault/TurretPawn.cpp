@@ -1,4 +1,6 @@
 #include "TurretPawn.h"
+#include "Kismet/GameplayStatics.h"
+#include "MyGameMode.h"
 
 ATurretPawn::ATurretPawn()
 {
@@ -54,6 +56,13 @@ void ATurretPawn::UpdateMaterialColor(UStaticMeshComponent* Mesh, int32 Material
 
 void ATurretPawn::RotateTurret(FVector TargetDirection)
 {
+    AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+
+    if (GameMode && !GameMode->bGameStarted)
+    {
+        return;
+    }
+
     FRotator CurrentRotation = TurretMesh->GetComponentRotation();
     FRotator TargetRotation = FRotationMatrix::MakeFromX(TargetDirection).Rotator();
     FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, GetWorld()->DeltaTimeSeconds, RotationSpeed);
