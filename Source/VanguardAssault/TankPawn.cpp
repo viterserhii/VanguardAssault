@@ -2,6 +2,8 @@
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "MyGameMode.h"
 
 ATankPawn::ATankPawn()
 {
@@ -38,6 +40,13 @@ void ATankPawn::Tick(float DeltaTime)
 
 void ATankPawn::MoveForward(float Value)
 {
+    AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+
+    if (GameMode && !GameMode->bGameStarted)
+    {
+        return;
+    }
+
     if (!FMath::IsNearlyEqual(Value, CurrentAcceleration, 0.001f))
     {
         CurrentAcceleration = FMath::FInterpTo(CurrentAcceleration, Value, GetWorld()->DeltaTimeSeconds, 1.0f / AccelerationDuration);
@@ -50,6 +59,13 @@ void ATankPawn::MoveForward(float Value)
 
 void ATankPawn::TurnRight(float Value)
 {
+    AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+
+    if (GameMode && !GameMode->bGameStarted)
+    {
+        return;
+    }
+
     if (Value != 0.0f)
     {
         FRotator DeltaRotation = FRotator(0.f, Value * 30.0f * GetWorld()->DeltaTimeSeconds, 0.f);
@@ -59,6 +75,13 @@ void ATankPawn::TurnRight(float Value)
 
 void ATankPawn::Fire()
 {
+    AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+
+    if (GameMode && !GameMode->bGameStarted)
+    {
+        return;
+    }
+
     if (bCanFire && ProjectileClass)
     {
         FVector SpawnLocation = ProjectileSpawnPoint->GetComponentLocation();

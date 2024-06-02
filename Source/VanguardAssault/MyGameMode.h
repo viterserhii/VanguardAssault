@@ -40,6 +40,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> CountdownWidgetClass;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> StartMenuWidgetClass;
+
     UPROPERTY()
     UUserWidget* WinWidget;
 
@@ -48,6 +51,9 @@ public:
 
     UPROPERTY()
     UUserWidget* CountdownWidget;
+
+    UPROPERTY()
+    UUserWidget* StartMenuWidget;
 
 private:
     APawn* PlayerPawn;
@@ -63,6 +69,16 @@ private:
     void UpdateCountdown();
     void HideCountdownWidget();
     void RestartGame();
-    void EnablePlayerInput();
-    void DisablePlayerInput();
+
+    UFUNCTION()
+    void StartGame();
+
+    UFUNCTION()
+    void StartGameWithDelay();
+
+    UFUNCTION()
+    void ShowStartMenu();
+
+    UFUNCTION()
+    void QuitGame();
 };

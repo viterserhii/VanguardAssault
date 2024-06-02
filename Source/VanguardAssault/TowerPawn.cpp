@@ -2,6 +2,8 @@
 #include "GameFramework/Actor.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
+#include "MyGameMode.h"
 
 ATowerPawn::ATowerPawn()
 {
@@ -52,6 +54,14 @@ void ATowerPawn::UpdateTurretRotation()
 
 void ATowerPawn::FireAtPlayer()
 {
+
+AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+
+if (GameMode && !GameMode->bGameStarted)
+{
+    return;
+}
+
     if (TargetActor)
     {
         if (ProjectileClass)

@@ -4,7 +4,9 @@
 #include "TankPawn.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
 #include "TimerManager.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 AMyGameMode::AMyGameMode()
 {
@@ -20,19 +22,19 @@ void AMyGameMode::BeginPlay()
 
     PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 
-    ShowCountdownWidget();
-
-    DisablePlayerInput();
-
-    GetWorld()->GetTimerManager().SetTimer(CountdownTimerHandle, this, &AMyGameMode::UpdateCountdown, 1.0f, true);
+    ShowStartMenu();
 }
+
 
 void AMyGameMode::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    CheckWinCondition();
-    CheckLoseCondition();
+    if (bGameStarted && !bIsGameOver)
+    {
+        CheckWinCondition();
+        CheckLoseCondition();
+    }
 }
 
 void AMyGameMode::ShowCountdownWidget()
@@ -52,7 +54,7 @@ void AMyGameMode::UpdateCountdown()
     if (CountdownTime <= 0)
     {
         HideCountdownWidget();
-        EnablePlayerInput();
+        StartGame();
         GetWorld()->GetTimerManager().ClearTimer(CountdownTimerHandle);
         return;
     }
@@ -77,36 +79,15 @@ void AMyGameMode::HideCountdownWidget()
     }
 }
 
-void AMyGameMode::RestartGame()
+void AMyGameMode::StartGame()
 {
-    UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
-}
-
-void AMyGameMode::EnablePlayerInput()
-{
-    if (PlayerPawn)
+    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    if (PlayerController)
     {
-        APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-        if (PlayerController)
-        {
-            PlayerController->SetInputMode(FInputModeGameOnly());
-            PlayerController->bShowMouseCursor = false;
-            bGameStarted = true;
-        }
+        PlayerController->bShowMouseCursor = false;
     }
-}
 
-void AMyGameMode::DisablePlayerInput()
-{
-    if (PlayerPawn)
-    {
-        APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-        if (PlayerController)
-        {
-            PlayerController->SetInputMode(FInputModeUIOnly());
-            PlayerController->bShowMouseCursor = true;
-        }
-    }
+    bGameStarted = true;
 }
 
 void AMyGameMode::CheckWinCondition()
@@ -122,7 +103,6 @@ void AMyGameMode::CheckWinCondition()
     if (Towers.Num() == 0)
     {
         bIsGameOver = true;
-        //UE_LOG(LogTemp, Warning, TEXT("You Win!"));
         ShowWinWidget();
         GetWorld()->GetTimerManager().SetTimer(RestartTimerHandle, this, &AMyGameMode::RestartGame, 5.0f, false);
     }
@@ -138,11 +118,11 @@ void AMyGameMode::CheckLoseCondition()
     if (!PlayerPawn || PlayerPawn->IsPendingKill())
     {
         bIsGameOver = true;
-        //UE_LOG(LogTemp, Warning, TEXT("You Lose!"));
         ShowLoseWidget();
         GetWorld()->GetTimerManager().SetTimer(RestartTimerHandle, this, &AMyGameMode::RestartGame, 5.0f, false);
     }
 }
+
 
 void AMyGameMode::ShowWinWidget()
 {
@@ -166,4 +146,66 @@ void AMyGameMode::ShowLoseWidget()
             LoseWidget->AddToViewport();
         }
     }
+}
+
+void AMyGameMode::StartGameWithDelay()
+{
+    if (PlayerPawn)
+    {
+        PlayerPawn->SetActorHiddenInGame(false);
+    }
+    if (StartMenuWidget)
+    {
+        StartMenuWidget->RemoveFromViewport();
+    }
+
+    ShowCountdownWidget();
+
+    GetWorld()->GetTimerManager().SetTimer(CountdownTimerHandle, this, &AMyGameMode::UpdateCountdown, 1.0f, true);
+}
+
+
+void AMyGameMode::ShowStartMenu()
+{
+    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    if (PlayerController)
+    {
+        PlayerController->bShowMouseCursor = true;
+    }
+
+    if (PlayerPawn)
+    {
+        PlayerPawn->SetActorHiddenInGame(true);
+    }
+
+    if (StartMenuWidgetClass)
+    {
+        StartMenuWidget = CreateWidget<UUserWidget>(GetWorld(), StartMenuWidgetClass);
+        if (StartMenuWidget)
+        {
+            StartMenuWidget->AddToViewport();
+
+            UButton* StartButton = Cast<UButton>(StartMenuWidget->GetWidgetFromName("StartButton"));
+            UButton* ExitButton = Cast<UButton>(StartMenuWidget->GetWidgetFromName("ExitButton"));
+            if (StartButton)
+            {
+                StartButton->OnClicked.AddDynamic(this, &AMyGameMode::StartGameWithDelay);
+            }
+            if (ExitButton)
+            {
+                ExitButton->OnClicked.AddDynamic(this, &AMyGameMode::QuitGame);
+            }
+        }
+    }
+}
+
+void AMyGameMode::QuitGame()
+{
+    UKismetSystemLibrary::QuitGame(GetWorld(), UGameplayStatics::GetPlayerController(GetWorld(), 0), EQuitPreference::Quit, true);
+}
+
+void AMyGameMode::RestartGame()
+{
+    UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
+    ShowStartMenu();
 }

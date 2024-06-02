@@ -29,7 +29,6 @@ ATurretPawn::ATurretPawn()
 void ATurretPawn::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-    //DrawDebugSphere(GetWorld(), ProjectileSpawnPoint->GetComponentLocation(), 32.0f, 12, FColor::Red, false, -1.0f, 0, 2.0f);
 }
 
 void ATurretPawn::BeginPlay()
