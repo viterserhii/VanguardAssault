@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Particles/ParticleSystemComponent.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
@@ -29,6 +30,9 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
     float Damage;
+
+    UPROPERTY(EditAnywhere, Category = "Effects")
+    UParticleSystem* HitEffect;
 
     UFUNCTION()
     void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);

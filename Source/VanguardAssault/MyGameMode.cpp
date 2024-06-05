@@ -25,7 +25,6 @@ void AMyGameMode::BeginPlay()
     ShowStartMenu();
 }
 
-
 void AMyGameMode::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
@@ -122,7 +121,6 @@ void AMyGameMode::CheckLoseCondition()
         GetWorld()->GetTimerManager().SetTimer(RestartTimerHandle, this, &AMyGameMode::RestartGame, 5.0f, false);
     }
 }
-
 
 void AMyGameMode::ShowWinWidget()
 {

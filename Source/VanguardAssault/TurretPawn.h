@@ -6,6 +6,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/SceneComponent.h"
 #include "HealthComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "TurretPawn.generated.h"
 
 UENUM(BlueprintType)
@@ -52,6 +53,9 @@ public:
     UHealthComponent* HealthComponent;
 
     void HandleDeath();
+
+    UPROPERTY(EditAnywhere, Category = "Effects")
+    UParticleSystem* DeathEffect;
 
 private:
     void UpdateMaterialColor(UStaticMeshComponent* Mesh, int32 MaterialSlot);

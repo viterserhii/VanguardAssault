@@ -6,6 +6,7 @@
 #include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "TankPawn.generated.h"
 
 UCLASS()
@@ -53,4 +54,19 @@ private:
     void Fire();
 
     void ResetFire();
+
+     UPROPERTY(EditAnywhere, Category = "Effects")
+     UParticleSystem* FireEffect;
+
+     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
+     UParticleSystemComponent* LeftDustEffect1;
+
+     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
+     UParticleSystemComponent* LeftDustEffect2;
+
+     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
+     UParticleSystemComponent* RightDustEffect1;
+
+     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
+     UParticleSystemComponent* RightDustEffect2;
 };

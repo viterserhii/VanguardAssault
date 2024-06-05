@@ -37,6 +37,11 @@ void AProjectile::Tick(float DeltaTime)
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+    if (HitEffect)
+    {
+        UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, Hit.Location, Hit.Normal.Rotation());
+    }
+
     if (OtherActor && OtherActor != this && OtherComp)
     {
         UGameplayStatics::ApplyDamage(OtherActor, Damage, GetInstigatorController(), this, UDamageType::StaticClass());

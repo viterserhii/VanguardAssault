@@ -5,6 +5,7 @@
 #include "Projectile.h"
 #include "Components/SphereComponent.h"
 #include "TankPawn.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "TowerPawn.generated.h"
 
 
@@ -48,4 +49,7 @@ private:
     FTimerHandle UpdateTimerHandle;
     FTimerHandle FireTimerHandle;
     AActor* TargetActor;
+
+    UPROPERTY(EditAnywhere, Category = "Effects")
+    UParticleSystem* FireEffect;
 };

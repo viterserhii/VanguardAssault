@@ -85,5 +85,10 @@ FLinearColor ATurretPawn::GetColorForTeam(ETeamColor Team) const
 
 void ATurretPawn::HandleDeath()
 {
+    if (DeathEffect)
+    {
+         UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffect, GetActorLocation(), GetActorRotation());
+    }
+
     Destroy();
 }

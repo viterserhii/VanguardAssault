@@ -73,6 +73,11 @@ if (GameMode && !GameMode->bGameStarted)
             SpawnParams.Owner = this;
             SpawnParams.Instigator = GetInstigator();
 
+            if (FireEffect)
+            {
+                UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireEffect, SpawnLocation, SpawnRotation);
+            }
+
             AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
         }
     }

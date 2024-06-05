@@ -18,6 +18,23 @@ ATankPawn::ATankPawn()
     Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 
     bUseControllerRotationYaw = false;
+
+    LeftDustEffect1 = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("LeftDustEffect1"));
+    LeftDustEffect1->SetupAttachment(RootComponent);
+
+    LeftDustEffect2 = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("LeftDustEffect2"));
+    LeftDustEffect2->SetupAttachment(RootComponent);
+
+    RightDustEffect1 = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("RightDustEffect1"));
+    RightDustEffect1->SetupAttachment(RootComponent);
+
+    RightDustEffect2 = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("RightDustEffect2"));
+    RightDustEffect2->SetupAttachment(RootComponent);
+
+    LeftDustEffect1->bAutoActivate = false;
+    LeftDustEffect2->bAutoActivate = false;
+    RightDustEffect1->bAutoActivate = false;
+    RightDustEffect2->bAutoActivate = false;
 }
 
 void ATankPawn::BeginPlay()
@@ -54,6 +71,21 @@ void ATankPawn::MoveForward(float Value)
 
     FVector DeltaLocation = FVector(CurrentAcceleration * 1200.0f * GetWorld()->DeltaTimeSeconds, 0.f, 0.f);
     AddActorLocalOffset(DeltaLocation, true);
+
+    if (FMath::Abs(CurrentAcceleration) > 0.1f)
+    {
+        if (!LeftDustEffect1->IsActive()) LeftDustEffect1->Activate();
+        if (!LeftDustEffect2->IsActive()) LeftDustEffect2->Activate();
+        if (!RightDustEffect1->IsActive()) RightDustEffect1->Activate();
+        if (!RightDustEffect2->IsActive()) RightDustEffect2->Activate();
+    }
+    else
+    {
+        if (LeftDustEffect1->IsActive()) LeftDustEffect1->Deactivate();
+        if (LeftDustEffect2->IsActive()) LeftDustEffect2->Deactivate();
+        if (RightDustEffect1->IsActive()) RightDustEffect1->Deactivate();
+        if (RightDustEffect2->IsActive()) RightDustEffect2->Deactivate();
+    }
 }
 
 
@@ -92,6 +124,11 @@ void ATankPawn::Fire()
         SpawnParams.Instigator = GetInstigator();
 
         AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+
+        if (FireEffect)
+        {
+             UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireEffect, SpawnLocation, SpawnRotation);
+        }
 
         bCanFire = false;
         GetWorld()->GetTimerManager().SetTimer(FireRateTimerHandle, this, &ATankPawn::ResetFire, FireRate, false);
