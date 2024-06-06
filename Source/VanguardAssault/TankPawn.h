@@ -6,6 +6,7 @@
 #include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "TankPawn.generated.h"
 
@@ -69,4 +70,7 @@ private:
 
      UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
      UParticleSystemComponent* RightDustEffect2;
+
+     UPROPERTY(EditAnywhere, Category = "Sound")
+     USoundCue* FireSoundCue;
 };

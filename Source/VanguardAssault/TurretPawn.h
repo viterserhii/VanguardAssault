@@ -7,6 +7,7 @@
 #include "Components/SceneComponent.h"
 #include "HealthComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
 #include "TurretPawn.generated.h"
 
 UENUM(BlueprintType)
@@ -56,6 +57,9 @@ public:
 
     UPROPERTY(EditAnywhere, Category = "Effects")
     UParticleSystem* DeathEffect;
+
+    UPROPERTY(EditAnywhere, Category = "Sound")
+    USoundCue* DeathSoundCue;
 
 private:
     void UpdateMaterialColor(UStaticMeshComponent* Mesh, int32 MaterialSlot);

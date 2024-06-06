@@ -3,6 +3,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Sound/SoundCue.h"
 #include "Projectile.generated.h"
 
 UCLASS()
@@ -33,6 +34,9 @@ public:
 
     UPROPERTY(EditAnywhere, Category = "Effects")
     UParticleSystem* HitEffect;
+
+    UPROPERTY(EditAnywhere, Category = "Sound")
+    USoundCue* HitSoundCue;
 
     UFUNCTION()
     void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);

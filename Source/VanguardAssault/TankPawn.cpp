@@ -130,6 +130,11 @@ void ATankPawn::Fire()
              UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireEffect, SpawnLocation, SpawnRotation);
         }
 
+        if (FireSoundCue)
+        {
+            UGameplayStatics::PlaySoundAtLocation(this, FireSoundCue, GetActorLocation());
+        }
+
         bCanFire = false;
         GetWorld()->GetTimerManager().SetTimer(FireRateTimerHandle, this, &ATankPawn::ResetFire, FireRate, false);
     }

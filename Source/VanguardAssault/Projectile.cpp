@@ -42,6 +42,11 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
         UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, Hit.Location, Hit.Normal.Rotation());
     }
 
+    if (HitSoundCue)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, HitSoundCue, GetActorLocation());
+    }
+
     if (OtherActor && OtherActor != this && OtherComp)
     {
         UGameplayStatics::ApplyDamage(OtherActor, Damage, GetInstigatorController(), this, UDamageType::StaticClass());

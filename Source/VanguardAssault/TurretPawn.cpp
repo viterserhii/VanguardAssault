@@ -90,5 +90,10 @@ void ATurretPawn::HandleDeath()
          UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffect, GetActorLocation(), GetActorRotation());
     }
 
+    if (DeathSoundCue)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, DeathSoundCue, GetActorLocation());
+    }
+
     Destroy();
 }
