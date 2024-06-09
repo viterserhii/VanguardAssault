@@ -17,6 +17,7 @@ class VANGUARDASSAULT_API ATankPawn : public ATurretPawn
 
 public:
     ATankPawn();
+    void PlayEngineSound();
 
 protected:
     virtual void BeginPlay() override;
@@ -73,4 +74,16 @@ private:
 
      UPROPERTY(EditAnywhere, Category = "Sound")
      USoundCue* FireSoundCue;
+
+     UPROPERTY(EditAnywhere, Category = "Sound")
+     USoundCue* EngineSoundCue;
+
+     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound", meta = (AllowPrivateAccess = "true"))
+     UAudioComponent* EngineAudioComponent;
+
+     UPROPERTY(EditAnywhere, Category = "Sound")
+     USoundCue* TreadSoundCue;
+
+     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound", meta = (AllowPrivateAccess = "true"))
+     UAudioComponent* TreadAudioComponent;
 };

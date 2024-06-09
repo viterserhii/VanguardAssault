@@ -8,6 +8,7 @@
 #include "HealthComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 #include "TurretPawn.generated.h"
 
 UENUM(BlueprintType)
@@ -41,7 +42,7 @@ public:
     UStaticMeshComponent* TurretMesh;
 
     UPROPERTY(EditAnywhere, Category = "Turret")
-    float RotationSpeed = 1.0f;
+    float RotationSpeed = 30.0f;
     void RotateTurret(FVector TargetDirection);
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -60,6 +61,12 @@ public:
 
     UPROPERTY(EditAnywhere, Category = "Sound")
     USoundCue* DeathSoundCue;
+
+    UPROPERTY(EditAnywhere, Category = "Sound")
+    USoundCue* TurretRotationSoundCue;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound", meta = (AllowPrivateAccess = "true"))
+    UAudioComponent* TurretAudioComponent;
 
 private:
     void UpdateMaterialColor(UStaticMeshComponent* Mesh, int32 MaterialSlot);

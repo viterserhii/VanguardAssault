@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "Blueprint/UserWidget.h"
+#include "Sound/SoundCue.h"
 #include "MyGameMode.generated.h"
 
 UCLASS()
@@ -55,6 +56,12 @@ public:
     UPROPERTY()
     UUserWidget* StartMenuWidget;
 
+    UPROPERTY(EditAnywhere, Category = "Sound")
+    USoundCue* AmbientSoundCue;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound", meta = (AllowPrivateAccess = "true"))
+    UAudioComponent* AmbientAudioComponent;
+
 private:
     APawn* PlayerPawn;
 
@@ -81,4 +88,6 @@ private:
 
     UFUNCTION()
     void QuitGame();
+
+    void PlayAmbientSound();
 };

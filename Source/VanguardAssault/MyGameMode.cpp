@@ -13,7 +13,10 @@ AMyGameMode::AMyGameMode()
     PrimaryActorTick.bCanEverTick = true;
     bIsGameOver = false;
     bGameStarted = false;
-    CountdownTime = 10;
+    CountdownTime = 5;
+
+    AmbientAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AmbientAudioComponent"));
+    AmbientAudioComponent->bAutoActivate = false;
 }
 
 void AMyGameMode::BeginPlay()
@@ -23,6 +26,12 @@ void AMyGameMode::BeginPlay()
     PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 
     ShowStartMenu();
+}
+
+void AMyGameMode::PlayAmbientSound()
+{
+        AmbientAudioComponent->SetSound(AmbientSoundCue);
+        AmbientAudioComponent->Play();
 }
 
 void AMyGameMode::Tick(float DeltaTime)
@@ -87,6 +96,7 @@ void AMyGameMode::StartGame()
     }
 
     bGameStarted = true;
+    PlayAmbientSound();
 }
 
 void AMyGameMode::CheckWinCondition()
@@ -160,6 +170,12 @@ void AMyGameMode::StartGameWithDelay()
     ShowCountdownWidget();
 
     GetWorld()->GetTimerManager().SetTimer(CountdownTimerHandle, this, &AMyGameMode::UpdateCountdown, 1.0f, true);
+
+    ATankPawn* TankPawn = Cast<ATankPawn>(PlayerPawn);
+    if (TankPawn)
+    {
+        TankPawn->PlayEngineSound();
+    }
 }
 
 

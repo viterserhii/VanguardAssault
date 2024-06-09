@@ -24,6 +24,10 @@ ATurretPawn::ATurretPawn()
     ProjectileSpawnPoint->SetupAttachment(TurretMesh);
 
     HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+
+    TurretAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("TurretAudioComponent"));
+    TurretAudioComponent->SetupAttachment(RootComponent);
+    TurretAudioComponent->bAutoActivate = false;
 }
 
 void ATurretPawn::Tick(float DeltaTime)
@@ -64,7 +68,34 @@ void ATurretPawn::RotateTurret(FVector TargetDirection)
 
     FRotator CurrentRotation = TurretMesh->GetComponentRotation();
     FRotator TargetRotation = FRotationMatrix::MakeFromX(TargetDirection).Rotator();
-    FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, GetWorld()->DeltaTimeSeconds, RotationSpeed);
+
+    FRotator DeltaRotation = TargetRotation - CurrentRotation;
+
+    DeltaRotation.Normalize();
+
+    float Step = RotationSpeed * GetWorld()->DeltaTimeSeconds;
+
+    FRotator NewRotation = CurrentRotation;
+
+    if (FMath::Abs(DeltaRotation.Yaw) > Step)
+    {
+        NewRotation.Yaw += FMath::Sign(DeltaRotation.Yaw) * Step;
+
+        if (TurretRotationSoundCue && !TurretAudioComponent->IsPlaying())
+        {
+            TurretAudioComponent->SetSound(TurretRotationSoundCue);
+            TurretAudioComponent->Play();
+        }
+    }
+    else
+    {
+        NewRotation.Yaw = TargetRotation.Yaw;
+
+        if (TurretAudioComponent->IsPlaying())
+        {
+            TurretAudioComponent->Stop();
+        }
+    }
 
     TurretMesh->SetWorldRotation(NewRotation);
 }

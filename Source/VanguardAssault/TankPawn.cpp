@@ -35,11 +35,26 @@ ATankPawn::ATankPawn()
     LeftDustEffect2->bAutoActivate = false;
     RightDustEffect1->bAutoActivate = false;
     RightDustEffect2->bAutoActivate = false;
+
+    EngineAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("EngineAudioComponent"));
+    EngineAudioComponent->SetupAttachment(RootComponent);
+    EngineAudioComponent->bAutoActivate = true;
+    EngineAudioComponent->SetSound(EngineSoundCue);
+
+    TreadAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("TreadAudioComponent"));
+    TreadAudioComponent->SetupAttachment(RootComponent);
+    TreadAudioComponent->bAutoActivate = false;
 }
 
 void ATankPawn::BeginPlay()
 {
     Super::BeginPlay();
+
+    AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    if (GameMode && GameMode->bGameStarted)
+    {
+        PlayEngineSound();
+    }
 }
 
 void ATankPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -78,6 +93,12 @@ void ATankPawn::MoveForward(float Value)
         if (!LeftDustEffect2->IsActive()) LeftDustEffect2->Activate();
         if (!RightDustEffect1->IsActive()) RightDustEffect1->Activate();
         if (!RightDustEffect2->IsActive()) RightDustEffect2->Activate();
+
+        if (TreadSoundCue && !TreadAudioComponent->IsPlaying())
+        {
+            TreadAudioComponent->SetSound(TreadSoundCue);
+            TreadAudioComponent->Play();
+        }
     }
     else
     {
@@ -85,9 +106,13 @@ void ATankPawn::MoveForward(float Value)
         if (LeftDustEffect2->IsActive()) LeftDustEffect2->Deactivate();
         if (RightDustEffect1->IsActive()) RightDustEffect1->Deactivate();
         if (RightDustEffect2->IsActive()) RightDustEffect2->Deactivate();
+
+        if (TreadAudioComponent->IsPlaying())
+        {
+            TreadAudioComponent->Stop();
+        }
     }
 }
-
 
 void ATankPawn::TurnRight(float Value)
 {
@@ -173,4 +198,10 @@ void ATankPawn::AimTowardsMousePosition()
             }
         }
     }
+}
+
+void ATankPawn::PlayEngineSound()
+{
+    EngineAudioComponent->SetSound(EngineSoundCue);
+    EngineAudioComponent->Play();
 }
