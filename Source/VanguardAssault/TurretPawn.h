@@ -68,6 +68,12 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound", meta = (AllowPrivateAccess = "true"))
     UAudioComponent* TurretAudioComponent;
 
+    UPROPERTY(EditAnywhere, Category = "Camera")
+    TSubclassOf<class UCameraShakeBase> ShootCameraShake;
+
+    UPROPERTY(EditAnywhere, Category = "Camera")
+    TSubclassOf<class UCameraShakeBase> DeathCameraShake;
+
 private:
     void UpdateMaterialColor(UStaticMeshComponent* Mesh, int32 MaterialSlot);
     FLinearColor GetColorForTeam(ETeamColor Team) const;

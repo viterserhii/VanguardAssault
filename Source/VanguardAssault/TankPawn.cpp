@@ -152,12 +152,17 @@ void ATankPawn::Fire()
 
         if (FireEffect)
         {
-             UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireEffect, SpawnLocation, SpawnRotation);
+            UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireEffect, SpawnLocation, SpawnRotation);
         }
 
         if (FireSoundCue)
         {
             UGameplayStatics::PlaySoundAtLocation(this, FireSoundCue, GetActorLocation());
+        }
+
+        if (ShootCameraShake)
+        {
+            GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(ShootCameraShake);
         }
 
         bCanFire = false;
