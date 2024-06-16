@@ -46,6 +46,9 @@ ATankPawn::ATankPawn()
     TreadAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("TreadAudioComponent"));
     TreadAudioComponent->SetupAttachment(RootComponent);
     TreadAudioComponent->bAutoActivate = false;
+
+    MaxAmmo = 20;
+    CurrentAmmo = MaxAmmo;
 }
 
 void ATankPawn::BeginPlay()
@@ -63,6 +66,12 @@ void ATankPawn::BeginPlay()
         HealthComponent->OnHealthChanged.AddDynamic(this, &ATankPawn::OnHealthChanged);
 
         OnHealthChanged(HealthComponent->GetCurrentHealth() / HealthComponent->GetMaxHealth());
+    }
+
+    AMyGameHUD* HUD = Cast<AMyGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+    if (HUD)
+    {
+        HUD->UpdateAmmoCount(CurrentAmmo, MaxAmmo);
     }
 }
 
@@ -148,7 +157,7 @@ void ATankPawn::Fire()
         return;
     }
 
-    if (bCanFire && ProjectileClass)
+    if (bCanFire && ProjectileClass && CurrentAmmo > 0)
     {
         FVector SpawnLocation = ProjectileSpawnPoint->GetComponentLocation();
         FRotator SpawnRotation = ProjectileSpawnPoint->GetComponentRotation();
@@ -176,6 +185,14 @@ void ATankPawn::Fire()
 
         bCanFire = false;
         GetWorld()->GetTimerManager().SetTimer(FireRateTimerHandle, this, &ATankPawn::ResetFire, FireRate, false);
+
+        CurrentAmmo--;
+
+        AMyGameHUD* HUD = Cast<AMyGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+        if (HUD)
+        {
+            HUD->UpdateAmmoCount(CurrentAmmo, MaxAmmo);
+        }
     }
 }
 

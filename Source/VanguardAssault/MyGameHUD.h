@@ -19,6 +19,16 @@ public:
     UFUNCTION()
     void UpdateHealthBar(float HealthPercentage);
 
+    UFUNCTION()
+    void UpdateAmmoCount(int32 CurrentAmmo, int32 MaxAmmo);
+
+    UFUNCTION()
+    void UpdateTowerCount(int32 TowerCount);
+
+    UFUNCTION()
+    void CheckTowerCount();
+
+private:
     UPROPERTY(EditAnywhere, Category = "HUD Elements")
     TSubclassOf<class UUserWidget> PlayerHUDBPClass;
 
@@ -28,5 +38,11 @@ public:
     UPROPERTY(meta = (BindWidget))
     class UProgressBar* HealthBar;
 
-private:
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* AmmoText;
+
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* TowerCountText;
+
+    FTimerHandle TowerCountTimerHandle;
 };

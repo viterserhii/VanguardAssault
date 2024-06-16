@@ -19,6 +19,12 @@ public:
     ATankPawn();
     void PlayEngineSound();
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
+    int32 CurrentAmmo;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
+    int32 MaxAmmo;
+
 protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
