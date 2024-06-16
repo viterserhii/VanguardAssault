@@ -11,6 +11,9 @@ class VANGUARDASSAULT_API AMyGameHUD : public AHUD
 
 public:
     AMyGameHUD();
+    void CreateHUD();
+    void ShowHUD();
+    void HideHUD();
 
 protected:
     virtual void BeginPlay() override;

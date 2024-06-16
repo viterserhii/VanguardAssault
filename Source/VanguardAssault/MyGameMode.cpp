@@ -2,6 +2,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "TowerPawn.h"
 #include "TankPawn.h"
+#include "MyGameHUD.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
@@ -175,6 +176,12 @@ void AMyGameMode::StartGameWithDelay()
     if (TankPawn)
     {
         TankPawn->PlayEngineSound();
+    }
+
+    AMyGameHUD* HUD = Cast<AMyGameHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
+    if (HUD)
+    {
+        HUD->ShowHUD();
     }
 }
 

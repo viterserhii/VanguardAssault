@@ -55,12 +55,6 @@ void ATankPawn::BeginPlay()
 {
     Super::BeginPlay();
 
-    AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-    if (GameMode && GameMode->bGameStarted)
-    {
-        PlayEngineSound();
-    }
-
     if (HealthComponent)
     {
         HealthComponent->OnHealthChanged.AddDynamic(this, &ATankPawn::OnHealthChanged);

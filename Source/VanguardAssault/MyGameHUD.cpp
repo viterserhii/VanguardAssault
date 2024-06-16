@@ -4,6 +4,7 @@
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "TowerPawn.h"
+#include "MyGameMode.h"
 
 AMyGameHUD::AMyGameHUD()
 {
@@ -14,7 +15,12 @@ AMyGameHUD::AMyGameHUD()
 void AMyGameHUD::BeginPlay()
 {
     Super::BeginPlay();
+    CreateHUD();
+    HideHUD();
+}
 
+void AMyGameHUD::CreateHUD()
+{
     if (PlayerHUDBPClass)
     {
         PlayerHUDWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDBPClass);
@@ -28,6 +34,22 @@ void AMyGameHUD::BeginPlay()
 
             GetWorld()->GetTimerManager().SetTimer(TowerCountTimerHandle, this, &AMyGameHUD::CheckTowerCount, 1.0f, true);
         }
+    }
+}
+
+void AMyGameHUD::ShowHUD()
+{
+    if (PlayerHUDWidget)
+    {
+        PlayerHUDWidget->SetVisibility(ESlateVisibility::Visible);
+    }
+}
+
+void AMyGameHUD::HideHUD()
+{
+    if (PlayerHUDWidget)
+    {
+        PlayerHUDWidget->SetVisibility(ESlateVisibility::Hidden);
     }
 }
 
