@@ -3,6 +3,8 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "MyGameHUD.h"
+#include "Blueprint/UserWidget.h"
 #include "MyGameMode.h"
 
 ATankPawn::ATankPawn()
@@ -54,6 +56,13 @@ void ATankPawn::BeginPlay()
     if (GameMode && GameMode->bGameStarted)
     {
         PlayEngineSound();
+    }
+
+    if (HealthComponent)
+    {
+        HealthComponent->OnHealthChanged.AddDynamic(this, &ATankPawn::OnHealthChanged);
+
+        OnHealthChanged(HealthComponent->GetCurrentHealth() / HealthComponent->GetMaxHealth());
     }
 }
 
@@ -209,4 +218,13 @@ void ATankPawn::PlayEngineSound()
 {
     EngineAudioComponent->SetSound(EngineSoundCue);
     EngineAudioComponent->Play();
+}
+
+void ATankPawn::OnHealthChanged(float HealthPercentage)
+{
+    AMyGameHUD* HUD = Cast<AMyGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+    if (HUD)
+    {
+        HUD->UpdateHealthBar(HealthPercentage);
+    }
 }

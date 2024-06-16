@@ -86,4 +86,7 @@ private:
 
      UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound", meta = (AllowPrivateAccess = "true"))
      UAudioComponent* TreadAudioComponent;
+
+     UFUNCTION()
+     void OnHealthChanged(float HealthPercentage);
 };

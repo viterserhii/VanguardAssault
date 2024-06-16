@@ -126,5 +126,10 @@ void ATurretPawn::HandleDeath()
         UGameplayStatics::PlaySoundAtLocation(this, DeathSoundCue, GetActorLocation());
     }
 
+    if (DeathCameraShake)
+    {
+        GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(DeathCameraShake);
+    }
+
     Destroy();
 }

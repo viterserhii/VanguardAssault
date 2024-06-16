@@ -4,8 +4,7 @@ UMyCameraShake::UMyCameraShake()
 {
     OscillationDuration = 1.0f;
     OscillationBlendInTime = 0.05f;
-    OscillationBlendOutTime = 0.2f;
-
+    OscillationBlendOutTime = 0.3f;
 
     RotOscillation.Pitch.Amplitude = 0.0f;
     RotOscillation.Yaw.Amplitude = 0.0f;

@@ -4,6 +4,9 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float, HealthPercentage);
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class VANGUARDASSAULT_API UHealthComponent : public UActorComponent
 {
@@ -16,10 +19,16 @@ protected:
     virtual void BeginPlay() override;
 
 public:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
     float MaxHealth;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
+    UPROPERTY(BlueprintAssignable, Category = "Events")
+    FOnHealthChangedSignature OnHealthChanged; 
+
+    float GetCurrentHealth() const { return CurrentHealth; }
+    float GetMaxHealth() const { return MaxHealth; }
+
+private:
     float CurrentHealth;
 
     UFUNCTION()

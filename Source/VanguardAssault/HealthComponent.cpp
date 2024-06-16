@@ -29,6 +29,9 @@ void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, c
 
     CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.0f, MaxHealth);
 
+    float HealthPercentage = CurrentHealth / MaxHealth;
+    OnHealthChanged.Broadcast(HealthPercentage);
+
     if (CurrentHealth <= 0.0f)
     {
         ATurretPawn* OwnerPawn = Cast<ATurretPawn>(DamagedActor);
