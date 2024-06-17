@@ -40,6 +40,11 @@ void AAmmoPickup::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, clas
         int32 AmmoToAdd = FMath::Min(AmmoAmount, Tank->MaxAmmo - Tank->CurrentAmmo);
         Tank->AddAmmo(AmmoToAdd);
 
+        if (PickupSound)
+        {
+            UGameplayStatics::PlaySoundAtLocation(this, PickupSound, GetActorLocation());
+        }
+
         SetActorHiddenInGame(true);
         SetActorEnableCollision(false);
 

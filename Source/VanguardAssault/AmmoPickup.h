@@ -31,6 +31,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
     float RespawnTime;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+    USoundBase* PickupSound;
+
     UFUNCTION()
     void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
