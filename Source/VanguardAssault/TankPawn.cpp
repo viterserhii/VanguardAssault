@@ -239,3 +239,14 @@ void ATankPawn::OnHealthChanged(float HealthPercentage)
         HUD->UpdateHealthBar(HealthPercentage);
     }
 }
+
+void ATankPawn::AddAmmo(int32 AmmoAmount)
+{
+    CurrentAmmo = FMath::Clamp(CurrentAmmo + AmmoAmount, 0, MaxAmmo);
+
+    AMyGameHUD* HUD = Cast<AMyGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+    if (HUD)
+    {
+        HUD->UpdateAmmoCount(CurrentAmmo, MaxAmmo);
+    }
+}

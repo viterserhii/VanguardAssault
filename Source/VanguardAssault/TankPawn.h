@@ -25,6 +25,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
     int32 MaxAmmo;
 
+    UFUNCTION()
+    void AddAmmo(int32 AmmoAmount);
+
 protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
