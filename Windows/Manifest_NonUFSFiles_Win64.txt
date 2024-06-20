@@ -1,7 +1,7 @@
 VanguardAssault/Binaries/Win64/D3D12/D3D12Core.dll	2024-03-23T13:12:27.620Z
 VanguardAssault/Binaries/Win64/D3D12/d3d12SDKLayers.dll	2024-03-23T13:12:27.650Z
 VanguardAssault/Binaries/Win64/OpenImageDenoise.dll	2024-03-23T13:52:55.249Z
-VanguardAssault/Binaries/Win64/VanguardAssault.exe	2024-06-20T16:41:04.971Z
+VanguardAssault/Binaries/Win64/VanguardAssault.exe	2024-06-20T18:16:15.178Z
 VanguardAssault/Binaries/Win64/tbb.dll	2024-03-23T13:12:07.095Z
 VanguardAssault/Binaries/Win64/tbb12.dll	2024-03-23T13:52:39.798Z
 VanguardAssault/Binaries/Win64/tbbmalloc.dll	2024-03-23T13:12:07.116Z
@@ -15,4 +15,4 @@ Engine/Binaries/ThirdParty/Vorbis/Win64/VS2015/libvorbisfile_64.dll	2024-03-23T1
 Engine/Binaries/ThirdParty/Windows/WinPixEventRuntime/x64/WinPixEventRuntime.dll	2024-03-23T13:12:27.654Z
 Engine/Binaries/ThirdParty/Windows/XAudio2_9/x64/xaudio2_9redist.dll	2024-03-23T13:12:27.655Z
 Engine/Content/Slate/Cursor/invisible.cur	2024-03-23T13:16:32.060Z
-VanguardAssault.exe	2024-06-20T17:16:25.932Z
+VanguardAssault.exe	2024-06-20T18:16:50.891Z
