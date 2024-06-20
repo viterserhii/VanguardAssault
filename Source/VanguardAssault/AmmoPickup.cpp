@@ -19,7 +19,7 @@ AAmmoPickup::AAmmoPickup()
     MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
     RotatingMovementComponent = CreateDefaultSubobject<URotatingMovementComponent>(TEXT("RotatingMovementComponent"));
-    RotatingMovementComponent->RotationRate = FRotator(0, 30, 0);
+    RotatingMovementComponent->RotationRate = FRotator(0, 60, 0);
 
     AmmoAmount = 10;
     RespawnTime = 30.0f;

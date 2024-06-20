@@ -10,7 +10,6 @@ ATurretPawn::ATurretPawn()
     RootComponent = CapsuleComponent;
 
     CapsuleComponent->InitCapsuleSize(22.0f, 44.0f);
-
     CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     CapsuleComponent->SetCollisionProfileName(TEXT("Pawn"));
 
