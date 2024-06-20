@@ -1,8 +1,0 @@
-VanguardAssault/Binaries/Win64/VanguardAssault.pdb	2024-06-20T18:16:15.923Z
-VanguardAssault/Binaries/Win64/tbb.pdb	2024-03-23T13:12:07.116Z
-VanguardAssault/Binaries/Win64/tbbmalloc.pdb	2024-03-23T13:12:07.133Z
-Engine/Content/SlateDebug/Fonts/LastResort.tps	2024-03-23T13:16:32.533Z
-Engine/Content/SlateDebug/Fonts/LastResort.ttf	2024-03-23T13:16:32.538Z
-Engine/Extras/GPUDumpViewer/GPUDumpViewer.html	2024-03-23T13:24:07.045Z
-Engine/Extras/GPUDumpViewer/OpenGPUDumpViewer.bat	2024-03-23T13:24:07.045Z
-Engine/Extras/GPUDumpViewer/OpenGPUDumpViewer.sh	2024-03-23T13:24:07.046Z
