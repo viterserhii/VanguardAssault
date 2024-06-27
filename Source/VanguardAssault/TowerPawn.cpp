@@ -2,6 +2,7 @@
 #include "GameFramework/Actor.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
+#include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyGameMode.h"
 
@@ -45,22 +46,22 @@ void ATowerPawn::UpdateTurretRotation()
 {
     if (TargetActor)
     {
-        FVector Direction = TargetActor->GetActorLocation() - TurretMesh->GetComponentLocation();
-        Direction.Z = 0;
-        Direction = Direction.RotateAngleAxis(-90.0f, FVector(0.0f, 0.0f, 1.0f));
-        RotateTurret(Direction);
+            FVector Direction = TargetActor->GetActorLocation() - TurretMesh->GetComponentLocation();
+            Direction.Z = 0;
+            Direction = Direction.RotateAngleAxis(-90.0f, FVector(0.0f, 0.0f, 1.0f));
+            RotateTurret(Direction);
+        }
     }
-}
 
 void ATowerPawn::FireAtPlayer()
 {
 
-AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 
-if (GameMode && !GameMode->bGameStarted)
-{
-    return;
-}
+    if (GameMode && !GameMode->bGameStarted)
+    {
+        return;
+    }
 
     if (TargetActor)
     {

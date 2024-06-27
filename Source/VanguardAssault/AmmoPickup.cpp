@@ -9,7 +9,7 @@
 
 AAmmoPickup::AAmmoPickup()
 {
-    PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = true;
 
     SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
     RootComponent = SphereComponent;

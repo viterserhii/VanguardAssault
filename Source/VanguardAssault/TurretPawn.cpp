@@ -1,6 +1,7 @@
 #include "TurretPawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyGameMode.h"
+#include "Net/UnrealNetwork.h"
 
 ATurretPawn::ATurretPawn()
 {
@@ -27,11 +28,23 @@ ATurretPawn::ATurretPawn()
     TurretAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("TurretAudioComponent"));
     TurretAudioComponent->SetupAttachment(RootComponent);
     TurretAudioComponent->bAutoActivate = false;
+
+    SetReplicates(true);
+    SetReplicateMovement(true);
 }
 
 void ATurretPawn::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    if (HasAuthority())
+    {
+        ReplicatedTurretRotation = TurretMesh->GetComponentRotation();
+    }
+    else
+    {
+        TurretMesh->SetWorldRotation(ReplicatedTurretRotation);
+    }
 }
 
 void ATurretPawn::BeginPlay()
@@ -58,47 +71,76 @@ void ATurretPawn::UpdateMaterialColor(UStaticMeshComponent* Mesh, int32 Material
 
 void ATurretPawn::RotateTurret(FVector TargetDirection)
 {
-    AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-
-    if (GameMode && !GameMode->bGameStarted)
+    if (HasAuthority())
     {
-        return;
-    }
+        //AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 
-    FRotator CurrentRotation = TurretMesh->GetComponentRotation();
-    FRotator TargetRotation = FRotationMatrix::MakeFromX(TargetDirection).Rotator();
+        //if (GameMode && !GameMode->bGameStarted)
+        //{
+        //    return;
+        //}
 
-    FRotator DeltaRotation = TargetRotation - CurrentRotation;
+        FRotator CurrentRotation = TurretMesh->GetComponentRotation();
+        FRotator TargetRotation = FRotationMatrix::MakeFromX(TargetDirection).Rotator();
 
-    DeltaRotation.Normalize();
+        FRotator DeltaRotation = TargetRotation - CurrentRotation;
+        DeltaRotation.Normalize();
 
-    float Step = RotationSpeed * GetWorld()->DeltaTimeSeconds;
+        float Step = RotationSpeed * GetWorld()->DeltaTimeSeconds;
 
-    FRotator NewRotation = CurrentRotation;
+        FRotator NewRotation = CurrentRotation;
 
-    if (FMath::Abs(DeltaRotation.Yaw) > Step)
-    {
-        NewRotation.Yaw += FMath::Sign(DeltaRotation.Yaw) * Step;
-
-        if (TurretRotationSoundCue && !TurretAudioComponent->IsPlaying())
+        if (FMath::Abs(DeltaRotation.Yaw) > Step)
         {
-            TurretAudioComponent->SetSound(TurretRotationSoundCue);
-            TurretAudioComponent->Play();
+            NewRotation.Yaw += FMath::Sign(DeltaRotation.Yaw) * Step;
+
+            if (TurretRotationSoundCue && !TurretAudioComponent->IsPlaying())
+            {
+                TurretAudioComponent->SetSound(TurretRotationSoundCue);
+                TurretAudioComponent->Play();
+            }
         }
+        else
+        {
+            NewRotation.Yaw = TargetRotation.Yaw;
+
+            if (TurretAudioComponent->IsPlaying())
+            {
+                TurretAudioComponent->Stop();
+            }
+        }
+
+        TurretMesh->SetWorldRotation(NewRotation);
+
+        TurretRotation = NewRotation;
     }
     else
     {
-        NewRotation.Yaw = TargetRotation.Yaw;
-
-        if (TurretAudioComponent->IsPlaying())
-        {
-            TurretAudioComponent->Stop();
-        }
+        Server_RotateTurret(TargetDirection);
     }
-
-    TurretMesh->SetWorldRotation(NewRotation);
 }
 
+void ATurretPawn::OnRep_TurretRotation()
+{
+    TurretMesh->SetWorldRotation(ReplicatedTurretRotation);
+}
+
+void ATurretPawn::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(ATurretPawn, ReplicatedTurretRotation);
+}
+
+bool ATurretPawn::Server_RotateTurret_Validate(FVector TargetDirection)
+{
+    return true;
+}
+
+void ATurretPawn::Server_RotateTurret_Implementation(FVector TargetDirection)
+{
+    RotateTurret(TargetDirection);
+}
 
 FLinearColor ATurretPawn::GetColorForTeam(ETeamColor Team) const
 {
@@ -123,11 +165,6 @@ void ATurretPawn::HandleDeath()
     if (DeathSoundCue)
     {
         UGameplayStatics::PlaySoundAtLocation(this, DeathSoundCue, GetActorLocation());
-    }
-
-    if (DeathCameraShake)
-    {
-        GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(DeathCameraShake);
     }
 
     Destroy();

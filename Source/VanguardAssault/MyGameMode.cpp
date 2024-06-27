@@ -14,7 +14,7 @@ AMyGameMode::AMyGameMode()
     PrimaryActorTick.bCanEverTick = true;
     bIsGameOver = false;
     bGameStarted = false;
-    CountdownTime = 5;
+    CountdownTime = 3;
 
     AmbientAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AmbientAudioComponent"));
     AmbientAudioComponent->bAutoActivate = false;
