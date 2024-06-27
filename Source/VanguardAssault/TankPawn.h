@@ -28,27 +28,42 @@ public:
     UFUNCTION()
     void AddAmmo(int32 AmmoAmount);
 
+    UPROPERTY(ReplicatedUsing = OnRep_Position)
+    FVector Position;
+
+    UFUNCTION()
+    void OnRep_Position();
+
+    UPROPERTY(ReplicatedUsing = OnRep_Rotation)
+    FRotator Rotation;
+
+    UFUNCTION()
+    void OnRep_Rotation();
+
+    void MoveForward(float Value);
+    void UpdateMovement(float DeltaTime);
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerMoveForward(float Value);
+
+    void TurnRight(float Value);
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerTurnRight(float Value);
+
+    float CurrentAcceleration;
+    float AccelerationDuration;
+
 protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
-    void MoveForward(float Value);
-    void TurnRight(float Value);
     void AimTowardsMousePosition();
 
 private:
     UPROPERTY(VisibleAnywhere, Category = "Movement")
     UFloatingPawnMovement* MovementComponent;
-
-    UPROPERTY(EditAnywhere, Category = "Movement")
-    float AccelerationDuration = 2.0f;
-
-    UPROPERTY(ReplicatedUsing = OnRep_CurrentAcceleration)
-    float CurrentAcceleration;
-
-    UPROPERTY(Replicated)
-    float DesiredAcceleration;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
     USpringArmComponent* SpringArm;
@@ -103,27 +118,4 @@ private:
 
     UFUNCTION()
     void OnHealthChanged(float HealthPercentage);
-
-    UPROPERTY(ReplicatedUsing = OnRep_CurrentAcceleration)
-    float ReplicatedCurrentAcceleration;
-
-    UFUNCTION()
-    void OnRep_CurrentAcceleration();
-
-    UFUNCTION(Server, Reliable, WithValidation)
-    void Server_MoveForward(float Value);
-
-    UPROPERTY(ReplicatedUsing = OnRep_CurrentTurnRate)
-    float ReplicatedCurrentTurnRate;
-
-    UFUNCTION()
-    void OnRep_CurrentTurnRate();
-
-    UPROPERTY(Replicated)
-    float CurrentTurnRate;
-
-    UFUNCTION(Server, Reliable, WithValidation)
-    void Server_TurnRight(float Value);
-
-    //virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

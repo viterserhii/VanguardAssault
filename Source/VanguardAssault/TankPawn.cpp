@@ -10,6 +10,8 @@
 
 ATankPawn::ATankPawn()
 {
+    PrimaryActorTick.bCanEverTick = true;
+
     MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>("MovementComponent");
     MovementComponent->UpdatedComponent = RootComponent;
 
@@ -52,7 +54,10 @@ ATankPawn::ATankPawn()
     CurrentAmmo = MaxAmmo;
 
     SetReplicates(true);
-    SetReplicateMovement(true);
+
+    AccelerationDuration = 2.0f;
+    CurrentAcceleration = 0.0f;
+
 }
 
 void ATankPawn::BeginPlay()
@@ -87,37 +92,33 @@ void ATankPawn::Tick(float DeltaTime)
 
     if (HasAuthority())
     {
-        ReplicatedCurrentAcceleration = CurrentAcceleration;
-        ReplicatedCurrentTurnRate = CurrentTurnRate;
-    }
-    else
-    {
-        CurrentAcceleration = ReplicatedCurrentAcceleration;
-        CurrentTurnRate = ReplicatedCurrentTurnRate;
-    }
-    if (!HasAuthority())
-    {
-
-        FRotator DeltaRotation = FRotator(0.f, CurrentTurnRate * 30.0f * GetWorld()->DeltaTimeSeconds, 0.f);
-        AddActorLocalRotation(DeltaRotation);
+        UpdateMovement(DeltaTime);
     }
 }
 
 void ATankPawn::MoveForward(float Value)
 {
-    if (HasAuthority())
-    {
-        DesiredAcceleration = Value;
-    }
-    else
-    {
-        Server_MoveForward(Value);
-    }
+    ServerMoveForward(Value);
+}
 
-    CurrentAcceleration = FMath::FInterpTo(CurrentAcceleration, DesiredAcceleration, GetWorld()->DeltaTimeSeconds, 1.0f / AccelerationDuration);
+void ATankPawn::ServerMoveForward_Implementation(float Value)
+{
+    CurrentAcceleration = FMath::FInterpTo(CurrentAcceleration, Value, GetWorld()->DeltaTimeSeconds, 1.0f / AccelerationDuration);
 
-    FVector DeltaLocation = FVector(CurrentAcceleration * 1200.0f * GetWorld()->DeltaTimeSeconds, 0.f, 0.f);
+    UpdateMovement(GetWorld()->DeltaTimeSeconds);
+}
+
+bool ATankPawn::ServerMoveForward_Validate(float Value)
+{
+    return true;
+}
+
+void ATankPawn::UpdateMovement(float DeltaTime)
+{
+    FVector DeltaLocation = FVector(CurrentAcceleration * 600.0f * DeltaTime, 0.f, 0.f);
     AddActorLocalOffset(DeltaLocation, true);
+
+    Position = GetActorLocation();
 
     if (FMath::Abs(CurrentAcceleration) > 0.1f)
     {
@@ -146,64 +147,46 @@ void ATankPawn::MoveForward(float Value)
     }
 }
 
-bool ATankPawn::Server_MoveForward_Validate(float Value)
-{
-    return true;
-}
-
-void ATankPawn::Server_MoveForward_Implementation(float Value)
-{
-    MoveForward(Value);
-}
-
-void ATankPawn::OnRep_CurrentAcceleration()
-{
-    CurrentAcceleration = ReplicatedCurrentAcceleration;
-}
-
 void ATankPawn::TurnRight(float Value)
 {
-    if (HasAuthority())
+    if (Value != 0.0f)
     {
-        CurrentTurnRate = Value;
-        ReplicatedCurrentTurnRate = Value;
-
-        if (Value != 0.0f)
-        {
-            FRotator DeltaRotation = FRotator(0.f, Value * 30.0f * GetWorld()->DeltaTimeSeconds, 0.f);
-            AddActorLocalRotation(DeltaRotation);
-        }
-    }
-    else
-    {
-        Server_TurnRight(Value);
+        ServerTurnRight(Value);
     }
 }
 
-bool ATankPawn::Server_TurnRight_Validate(float Value)
+void ATankPawn::ServerTurnRight_Implementation(float Value)
+{
+    if (Value != 0.0f)
+    {
+        FRotator DeltaRotation = FRotator(0.f, Value * 30.0f * GetWorld()->DeltaTimeSeconds, 0.f);
+        AddActorLocalRotation(DeltaRotation);
+
+        Rotation = GetActorRotation();
+    }
+}
+
+bool ATankPawn::ServerTurnRight_Validate(float Value)
 {
     return true;
 }
 
-void ATankPawn::Server_TurnRight_Implementation(float Value)
+void ATankPawn::OnRep_Position()
 {
-    TurnRight(Value);
+    SetActorLocation(Position);
 }
 
-void ATankPawn::OnRep_CurrentTurnRate()
+void ATankPawn::OnRep_Rotation()
 {
-    if (!HasAuthority())
-    {
-        FRotator DeltaRotation = FRotator(0.f, ReplicatedCurrentTurnRate * 30.0f * GetWorld()->DeltaTimeSeconds, 0.f);
-        AddActorLocalRotation(DeltaRotation);
-    }
+    SetActorRotation(Rotation);
 }
 
-void ATankPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void ATankPawn::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-    DOREPLIFETIME(ATankPawn, ReplicatedCurrentAcceleration);
-    DOREPLIFETIME(ATankPawn, ReplicatedCurrentTurnRate);
+
+    DOREPLIFETIME(ATankPawn, Position);
+    DOREPLIFETIME(ATankPawn, Rotation);
 }
 
 void ATankPawn::Fire()
