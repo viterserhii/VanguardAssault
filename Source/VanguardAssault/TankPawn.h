@@ -28,22 +28,42 @@ public:
     UFUNCTION()
     void AddAmmo(int32 AmmoAmount);
 
+    UPROPERTY(ReplicatedUsing = OnRep_Position)
+    FVector Position;
+
+    UFUNCTION()
+    void OnRep_Position();
+
+    UPROPERTY(ReplicatedUsing = OnRep_Rotation)
+    FRotator Rotation;
+
+    UFUNCTION()
+    void OnRep_Rotation();
+
+    void MoveForward(float Value);
+    void UpdateMovement(float DeltaTime);
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerMoveForward(float Value);
+
+    void TurnRight(float Value);
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerTurnRight(float Value);
+
+    float CurrentAcceleration;
+    float AccelerationDuration;
+
 protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
-    void MoveForward(float Value);
-    void TurnRight(float Value);
     void AimTowardsMousePosition();
 
 private:
     UPROPERTY(VisibleAnywhere, Category = "Movement")
     UFloatingPawnMovement* MovementComponent;
-
-    UPROPERTY(EditAnywhere, Category = "Movement")
-    float AccelerationDuration = 2.0f;
-    float CurrentAcceleration = 0.0f;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
     USpringArmComponent* SpringArm;
@@ -66,36 +86,36 @@ private:
 
     void ResetFire();
 
-     UPROPERTY(EditAnywhere, Category = "Effects")
-     UParticleSystem* FireEffect;
+    UPROPERTY(EditAnywhere, Category = "Effects")
+    UParticleSystem* FireEffect;
 
-     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
-     UParticleSystemComponent* LeftDustEffect1;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
+    UParticleSystemComponent* LeftDustEffect1;
 
-     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
-     UParticleSystemComponent* LeftDustEffect2;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
+    UParticleSystemComponent* LeftDustEffect2;
 
-     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
-     UParticleSystemComponent* RightDustEffect1;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
+    UParticleSystemComponent* RightDustEffect1;
 
-     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
-     UParticleSystemComponent* RightDustEffect2;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
+    UParticleSystemComponent* RightDustEffect2;
 
-     UPROPERTY(EditAnywhere, Category = "Sound")
-     USoundCue* FireSoundCue;
+    UPROPERTY(EditAnywhere, Category = "Sound")
+    USoundCue* FireSoundCue;
 
-     UPROPERTY(EditAnywhere, Category = "Sound")
-     USoundCue* EngineSoundCue;
+    UPROPERTY(EditAnywhere, Category = "Sound")
+    USoundCue* EngineSoundCue;
 
-     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound", meta = (AllowPrivateAccess = "true"))
-     UAudioComponent* EngineAudioComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound", meta = (AllowPrivateAccess = "true"))
+    UAudioComponent* EngineAudioComponent;
 
-     UPROPERTY(EditAnywhere, Category = "Sound")
-     USoundCue* TreadSoundCue;
+    UPROPERTY(EditAnywhere, Category = "Sound")
+    USoundCue* TreadSoundCue;
 
-     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound", meta = (AllowPrivateAccess = "true"))
-     UAudioComponent* TreadAudioComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound", meta = (AllowPrivateAccess = "true"))
+    UAudioComponent* TreadAudioComponent;
 
-     UFUNCTION()
-     void OnHealthChanged(float HealthPercentage);
+    UFUNCTION()
+    void OnHealthChanged(float HealthPercentage);
 };

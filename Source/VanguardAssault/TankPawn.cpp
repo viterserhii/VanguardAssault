@@ -6,15 +6,18 @@
 #include "MyGameHUD.h"
 #include "Blueprint/UserWidget.h"
 #include "MyGameMode.h"
+#include "Net/UnrealNetwork.h"
 
 ATankPawn::ATankPawn()
 {
+    PrimaryActorTick.bCanEverTick = true;
+
     MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>("MovementComponent");
     MovementComponent->UpdatedComponent = RootComponent;
 
     SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
     SpringArm->SetupAttachment(RootComponent);
-    SpringArm->TargetArmLength = 300.f; 
+    SpringArm->TargetArmLength = 300.f;
 
     Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
@@ -49,6 +52,12 @@ ATankPawn::ATankPawn()
 
     MaxAmmo = 20;
     CurrentAmmo = MaxAmmo;
+
+    SetReplicates(true);
+
+    AccelerationDuration = 2.0f;
+    CurrentAcceleration = 0.0f;
+
 }
 
 void ATankPawn::BeginPlay()
@@ -80,24 +89,36 @@ void ATankPawn::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
     AimTowardsMousePosition();
+
+    if (HasAuthority())
+    {
+        UpdateMovement(DeltaTime);
+    }
 }
 
 void ATankPawn::MoveForward(float Value)
 {
-    AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    ServerMoveForward(Value);
+}
 
-    if (GameMode && !GameMode->bGameStarted)
-    {
-        return;
-    }
+void ATankPawn::ServerMoveForward_Implementation(float Value)
+{
+    CurrentAcceleration = FMath::FInterpTo(CurrentAcceleration, Value, GetWorld()->DeltaTimeSeconds, 1.0f / AccelerationDuration);
 
-    if (!FMath::IsNearlyEqual(Value, CurrentAcceleration, 0.001f))
-    {
-        CurrentAcceleration = FMath::FInterpTo(CurrentAcceleration, Value, GetWorld()->DeltaTimeSeconds, 1.0f / AccelerationDuration);
-    }
+    UpdateMovement(GetWorld()->DeltaTimeSeconds);
+}
 
-    FVector DeltaLocation = FVector(CurrentAcceleration * 1200.0f * GetWorld()->DeltaTimeSeconds, 0.f, 0.f);
+bool ATankPawn::ServerMoveForward_Validate(float Value)
+{
+    return true;
+}
+
+void ATankPawn::UpdateMovement(float DeltaTime)
+{
+    FVector DeltaLocation = FVector(CurrentAcceleration * 600.0f * DeltaTime, 0.f, 0.f);
     AddActorLocalOffset(DeltaLocation, true);
+
+    Position = GetActorLocation();
 
     if (FMath::Abs(CurrentAcceleration) > 0.1f)
     {
@@ -128,18 +149,44 @@ void ATankPawn::MoveForward(float Value)
 
 void ATankPawn::TurnRight(float Value)
 {
-    AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-
-    if (GameMode && !GameMode->bGameStarted)
+    if (Value != 0.0f)
     {
-        return;
+        ServerTurnRight(Value);
     }
+}
 
+void ATankPawn::ServerTurnRight_Implementation(float Value)
+{
     if (Value != 0.0f)
     {
         FRotator DeltaRotation = FRotator(0.f, Value * 30.0f * GetWorld()->DeltaTimeSeconds, 0.f);
         AddActorLocalRotation(DeltaRotation);
+
+        Rotation = GetActorRotation();
     }
+}
+
+bool ATankPawn::ServerTurnRight_Validate(float Value)
+{
+    return true;
+}
+
+void ATankPawn::OnRep_Position()
+{
+    SetActorLocation(Position);
+}
+
+void ATankPawn::OnRep_Rotation()
+{
+    SetActorRotation(Rotation);
+}
+
+void ATankPawn::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(ATankPawn, Position);
+    DOREPLIFETIME(ATankPawn, Rotation);
 }
 
 void ATankPawn::Fire()

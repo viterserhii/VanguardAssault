@@ -71,10 +71,22 @@ public:
     UPROPERTY(EditAnywhere, Category = "Camera")
     TSubclassOf<class UCameraShakeBase> ShootCameraShake;
 
-    UPROPERTY(EditAnywhere, Category = "Camera")
-    TSubclassOf<class UCameraShakeBase> DeathCameraShake;
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void Server_RotateTurret(FVector TargetDirection);
+
+    UPROPERTY(ReplicatedUsing = OnRep_TurretRotation)
+    FRotator TurretRotation;
+
+    UFUNCTION()
+    void OnRep_TurretRotation();
+
+    UPROPERTY(ReplicatedUsing = OnRep_TurretRotation)
+    FRotator ReplicatedTurretRotation;
+
     void UpdateMaterialColor(UStaticMeshComponent* Mesh, int32 MaterialSlot);
     FLinearColor GetColorForTeam(ETeamColor Team) const;
 };
