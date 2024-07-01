@@ -213,13 +213,28 @@ void ATankPawn::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifet
 
 void ATankPawn::Fire()
 {
-    AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-
-    if (GameMode && !GameMode->bGameStarted)
+    if (HasAuthority())
     {
-        return;
+        HandleFiring();
     }
+    else
+    {
+        ServerFire();
+    }
+}
 
+void ATankPawn::ServerFire_Implementation()
+{
+    HandleFiring();
+}
+
+bool ATankPawn::ServerFire_Validate()
+{
+    return true;
+}
+
+void ATankPawn::HandleFiring()
+{
     if (bCanFire && ProjectileClass && CurrentAmmo > 0)
     {
         FVector SpawnLocation = ProjectileSpawnPoint->GetComponentLocation();
@@ -231,31 +246,35 @@ void ATankPawn::Fire()
 
         AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
 
-        if (FireEffect)
-        {
-            UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireEffect, SpawnLocation, SpawnRotation);
-        }
-
-        if (FireSoundCue)
-        {
-            UGameplayStatics::PlaySoundAtLocation(this, FireSoundCue, GetActorLocation());
-        }
-
-        if (ShootCameraShake)
-        {
-            GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(ShootCameraShake);
-        }
-
-        bCanFire = false;
-        GetWorld()->GetTimerManager().SetTimer(FireRateTimerHandle, this, &ATankPawn::ResetFire, FireRate, false);
-
         CurrentAmmo--;
-
         AMyGameHUD* HUD = Cast<AMyGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
         if (HUD)
         {
             HUD->UpdateAmmoCount(CurrentAmmo, MaxAmmo);
         }
+
+        MulticastFireEffects(SpawnLocation, SpawnRotation);
+
+        bCanFire = false;
+        GetWorld()->GetTimerManager().SetTimer(FireRateTimerHandle, this, &ATankPawn::ResetFire, FireRate, false);
+    }
+}
+
+void ATankPawn::MulticastFireEffects_Implementation(FVector SpawnLocation, FRotator SpawnRotation)
+{
+    if (FireEffect)
+    {
+        UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireEffect, SpawnLocation, SpawnRotation);
+    }
+
+    if (FireSoundCue)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, FireSoundCue, GetActorLocation());
+    }
+
+    if (ShootCameraShake)
+    {
+        GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(ShootCameraShake);
     }
 }
 

@@ -19,15 +19,6 @@ public:
     ATankPawn();
     void PlayEngineSound();
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
-    int32 CurrentAmmo;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
-    int32 MaxAmmo;
-
-    UFUNCTION()
-    void AddAmmo(int32 AmmoAmount);
-
     UPROPERTY(ReplicatedUsing = OnRep_Position)
     FVector ReplicatedPosition;
 
@@ -55,6 +46,32 @@ public:
     float AccelerationDuration;
     float TurnSpeed;
 
+    ///////////////////////////////////////////////////
+
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void Fire();
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerFire();
+
+    void HandleFiring();
+
+    UFUNCTION(NetMulticast, Unreliable)
+    void MulticastFireEffects(FVector SpawnLocation, FRotator SpawnRotation);
+
+    void ResetFire();
+
+    UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
+    float FireRate;
+
+    void AddAmmo(int32 AmmoAmount);
+
+    UPROPERTY(Replicated)
+    int32 MaxAmmo;
+
+    UPROPERTY(Replicated)
+    int32 CurrentAmmo;
+
 protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
@@ -75,17 +92,8 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Projectile")
     TSubclassOf<class AProjectile> ProjectileClass;
 
-    UPROPERTY(EditAnywhere, Category = "Combat")
-    float FireRate = 3.0f;
-
     bool bCanFire = true;
-
     FTimerHandle FireRateTimerHandle;
-
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    void Fire();
-
-    void ResetFire();
 
     UPROPERTY(EditAnywhere, Category = "Effects")
     UParticleSystem* FireEffect;
