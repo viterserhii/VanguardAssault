@@ -29,13 +29,13 @@ public:
     void AddAmmo(int32 AmmoAmount);
 
     UPROPERTY(ReplicatedUsing = OnRep_Position)
-    FVector Position;
+    FVector ReplicatedPosition;
 
     UFUNCTION()
     void OnRep_Position();
 
     UPROPERTY(ReplicatedUsing = OnRep_Rotation)
-    FRotator Rotation;
+    FRotator ReplicatedRotation;
 
     UFUNCTION()
     void OnRep_Rotation();
@@ -53,6 +53,7 @@ public:
 
     float CurrentAcceleration;
     float AccelerationDuration;
+    float TurnSpeed;
 
 protected:
     virtual void BeginPlay() override;
@@ -118,4 +119,10 @@ private:
 
     UFUNCTION()
     void OnHealthChanged(float HealthPercentage);
+
+    FVector ClientPosition;
+    FRotator ClientRotation;
+
+    float LastReplicatedTime;
+    float ReplicationInterval;
 };

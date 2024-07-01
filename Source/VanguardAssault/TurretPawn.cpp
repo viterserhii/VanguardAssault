@@ -43,7 +43,7 @@ void ATurretPawn::Tick(float DeltaTime)
     }
     else
     {
-        TurretMesh->SetWorldRotation(ReplicatedTurretRotation);
+        TurretMesh->SetWorldRotation(FMath::RInterpTo(TurretMesh->GetComponentRotation(), ReplicatedTurretRotation, DeltaTime, 5.0f));
     }
 }
 
