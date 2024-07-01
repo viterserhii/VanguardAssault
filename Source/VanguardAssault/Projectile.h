@@ -20,24 +20,27 @@ protected:
 public:
     virtual void Tick(float DeltaTime) override;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    USceneComponent* RootSceneComponent;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    UStaticMeshComponent* ProjectileMesh;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    class UProjectileMovementComponent* ProjectileMovement;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-    float Damage;
-
-    UPROPERTY(EditAnywhere, Category = "Effects")
+    UPROPERTY(EditDefaultsOnly, Category = "Effects")
     UParticleSystem* HitEffect;
 
-    UPROPERTY(EditAnywhere, Category = "Sound")
+    UPROPERTY(EditDefaultsOnly, Category = "Sound")
     USoundCue* HitSoundCue;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+    USceneComponent* RootSceneComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+    UStaticMeshComponent* ProjectileMesh;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+    class UProjectileMovementComponent* ProjectileMovement;
+
+    UPROPERTY(Replicated, EditDefaultsOnly, Category = "Damage")
+    float Damage;
 
     UFUNCTION()
     void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+private:
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
