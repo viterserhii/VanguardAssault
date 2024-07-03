@@ -55,14 +55,24 @@ ATankPawn::ATankPawn()
 
     SetReplicates(true);
 
+    bReplicates = true;
+
     AccelerationDuration = 2.0f;
     CurrentAcceleration = 0.0f;
+    TurnSpeed = 30.0f;
 
+    LastReplicatedTime = 0.0f;
+    ReplicationInterval = 0.1f;
 }
 
 void ATankPawn::BeginPlay()
 {
     Super::BeginPlay();
+
+    if (HasAuthority())
+    {
+        SetReplicateMovement(true);
+    }
 
     if (HealthComponent)
     {
@@ -93,6 +103,18 @@ void ATankPawn::Tick(float DeltaTime)
     if (HasAuthority())
     {
         UpdateMovement(DeltaTime);
+
+        if (GetWorld()->TimeSeconds - LastReplicatedTime > ReplicationInterval)
+        {
+            ReplicatedPosition = GetActorLocation();
+            ReplicatedRotation = GetActorRotation();
+            LastReplicatedTime = GetWorld()->TimeSeconds;
+        }
+    }
+    else
+    {
+        SetActorLocation(FMath::VInterpTo(GetActorLocation(), ReplicatedPosition, DeltaTime, 5.0f));
+        SetActorRotation(FMath::RInterpTo(GetActorRotation(), ReplicatedRotation, DeltaTime, 5.0f));
     }
 }
 
@@ -115,10 +137,10 @@ bool ATankPawn::ServerMoveForward_Validate(float Value)
 
 void ATankPawn::UpdateMovement(float DeltaTime)
 {
-    FVector DeltaLocation = FVector(CurrentAcceleration * 600.0f * DeltaTime, 0.f, 0.f);
+    FVector DeltaLocation = FVector(CurrentAcceleration * 1200.0f * DeltaTime, 0.f, 0.f);
     AddActorLocalOffset(DeltaLocation, true);
 
-    Position = GetActorLocation();
+    ReplicatedPosition = GetActorLocation();
 
     if (FMath::Abs(CurrentAcceleration) > 0.1f)
     {
@@ -159,10 +181,10 @@ void ATankPawn::ServerTurnRight_Implementation(float Value)
 {
     if (Value != 0.0f)
     {
-        FRotator DeltaRotation = FRotator(0.f, Value * 30.0f * GetWorld()->DeltaTimeSeconds, 0.f);
+        FRotator DeltaRotation = FRotator(0.f, Value * TurnSpeed * GetWorld()->DeltaTimeSeconds, 0.f);
         AddActorLocalRotation(DeltaRotation);
 
-        Rotation = GetActorRotation();
+        ReplicatedRotation = GetActorRotation();
     }
 }
 
@@ -173,31 +195,46 @@ bool ATankPawn::ServerTurnRight_Validate(float Value)
 
 void ATankPawn::OnRep_Position()
 {
-    SetActorLocation(Position);
+    ClientPosition = ReplicatedPosition;
 }
 
 void ATankPawn::OnRep_Rotation()
 {
-    SetActorRotation(Rotation);
+    ClientRotation = ReplicatedRotation;
 }
 
 void ATankPawn::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-    DOREPLIFETIME(ATankPawn, Position);
-    DOREPLIFETIME(ATankPawn, Rotation);
+    DOREPLIFETIME(ATankPawn, ReplicatedPosition);
+    DOREPLIFETIME(ATankPawn, ReplicatedRotation);
 }
 
 void ATankPawn::Fire()
 {
-    AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-
-    if (GameMode && !GameMode->bGameStarted)
+    if (HasAuthority())
     {
-        return;
+        HandleFiring();
     }
+    else
+    {
+        ServerFire();
+    }
+}
 
+void ATankPawn::ServerFire_Implementation()
+{
+    HandleFiring();
+}
+
+bool ATankPawn::ServerFire_Validate()
+{
+    return true;
+}
+
+void ATankPawn::HandleFiring()
+{
     if (bCanFire && ProjectileClass && CurrentAmmo > 0)
     {
         FVector SpawnLocation = ProjectileSpawnPoint->GetComponentLocation();
@@ -209,31 +246,35 @@ void ATankPawn::Fire()
 
         AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
 
-        if (FireEffect)
-        {
-            UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireEffect, SpawnLocation, SpawnRotation);
-        }
-
-        if (FireSoundCue)
-        {
-            UGameplayStatics::PlaySoundAtLocation(this, FireSoundCue, GetActorLocation());
-        }
-
-        if (ShootCameraShake)
-        {
-            GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(ShootCameraShake);
-        }
-
-        bCanFire = false;
-        GetWorld()->GetTimerManager().SetTimer(FireRateTimerHandle, this, &ATankPawn::ResetFire, FireRate, false);
-
         CurrentAmmo--;
-
         AMyGameHUD* HUD = Cast<AMyGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
         if (HUD)
         {
             HUD->UpdateAmmoCount(CurrentAmmo, MaxAmmo);
         }
+
+        MulticastFireEffects(SpawnLocation, SpawnRotation);
+
+        bCanFire = false;
+        GetWorld()->GetTimerManager().SetTimer(FireRateTimerHandle, this, &ATankPawn::ResetFire, FireRate, false);
+    }
+}
+
+void ATankPawn::MulticastFireEffects_Implementation(FVector SpawnLocation, FRotator SpawnRotation)
+{
+    if (FireEffect)
+    {
+        UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireEffect, SpawnLocation, SpawnRotation);
+    }
+
+    if (FireSoundCue)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, FireSoundCue, GetActorLocation());
+    }
+
+    if (ShootCameraShake)
+    {
+        GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(ShootCameraShake);
     }
 }
 
