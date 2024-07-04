@@ -240,18 +240,3 @@ void AMyGameMode::RestartGame()
     UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
     ShowStartMenu();
 }
-
-//void AMyGameMode::HandlePlayerHealthChanged(float HealthPercentage)
-//{
-//    if (HealthPercentage <= 0.0f)
-//    {
-//        HandlePlayerRanOutOfHealth();
-//    }
-//}
-//
-//void AMyGameMode::HandlePlayerRanOutOfHealth()
-//{
-//    bIsGameOver = true;
-//    ShowLoseWidget();
-//    GetWorld()->GetTimerManager().SetTimer(RestartTimerHandle, this, &AMyGameMode::RestartGame, 5.0f, false);
-//}
