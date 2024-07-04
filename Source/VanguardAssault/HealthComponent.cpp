@@ -20,7 +20,7 @@ void UHealthComponent::BeginPlay()
     }
 }
 
-void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+void UHealthComponent::ReduceHealth(float Damage)
 {
     if (Damage <= 0.0f || CurrentHealth <= 0.0f)
     {
@@ -34,10 +34,17 @@ void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, c
 
     if (CurrentHealth <= 0.0f)
     {
-        ATurretPawn* OwnerPawn = Cast<ATurretPawn>(DamagedActor);
+        OnRanOutOfHealth.Broadcast();
+
+        ATurretPawn* OwnerPawn = Cast<ATurretPawn>(GetOwner());
         if (OwnerPawn)
         {
             OwnerPawn->HandleDeath();
         }
     }
+}
+
+void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+{
+    ReduceHealth(Damage);
 }
