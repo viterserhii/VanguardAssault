@@ -1,13 +1,16 @@
 #include "TowerPawn.h"
 #include "GameFramework/Actor.h"
+#include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyGameMode.h"
+#include "TankPawn.h"
 
 ATowerPawn::ATowerPawn()
 {
+    bReplicates = true;
     DetectionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DetectionSphere"));
     DetectionSphere->SetupAttachment(RootComponent);
     DetectionSphere->SetSphereRadius(2000.0f);
@@ -16,6 +19,11 @@ ATowerPawn::ATowerPawn()
 void ATowerPawn::BeginPlay()
 {
     Super::BeginPlay();
+}
+
+void ATowerPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
 
 void ATowerPawn::UpdateTurretRotation()
@@ -31,15 +39,16 @@ void ATowerPawn::UpdateTurretRotation()
 
 void ATowerPawn::FireAtPlayer()
 {
-    AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-
-    if (GameMode && !GameMode->bGameStarted)
+    if (HasAuthority())
     {
-        return;
+        if (GetTargetActor()) {
+            MulticastFireAtPlayer();
+        }
     }
+}
 
-    if (GetTargetActor())
-    {
+void ATowerPawn::MulticastFireAtPlayer_Implementation()
+{
         if (ProjectileClass)
         {
             FVector SpawnLocation = ProjectileSpawnPoint->GetComponentLocation();
@@ -56,5 +65,4 @@ void ATowerPawn::FireAtPlayer()
 
             AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
         }
-    }
 }

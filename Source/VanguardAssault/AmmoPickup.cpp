@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "Net/UnrealNetwork.h"
 
 AAmmoPickup::AAmmoPickup()
 {
@@ -25,6 +26,9 @@ AAmmoPickup::AAmmoPickup()
     RespawnTime = 30.0f;
 
     SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AAmmoPickup::OnOverlapBegin);
+
+    bReplicates = true;
+    bIsAvailable = true;
 }
 
 void AAmmoPickup::BeginPlay()
@@ -42,18 +46,41 @@ void AAmmoPickup::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, clas
 
         if (PickupSound)
         {
-            UGameplayStatics::PlaySoundAtLocation(this, PickupSound, GetActorLocation());
+            MulticastPlayPickupSound();
         }
 
+        bIsAvailable = false;
         SetActorHiddenInGame(true);
         SetActorEnableCollision(false);
 
-        GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle, this, &AAmmoPickup::Respawn, RespawnTime, false);
+        if (HasAuthority())
+        {
+            GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle, this, &AAmmoPickup::Respawn, RespawnTime, false);
+        }
     }
 }
 
 void AAmmoPickup::Respawn()
 {
+    bIsAvailable = true;
     SetActorHiddenInGame(false);
     SetActorEnableCollision(true);
+}
+
+void AAmmoPickup::OnRep_IsAvailable()
+{
+    SetActorHiddenInGame(!bIsAvailable);
+    SetActorEnableCollision(bIsAvailable);
+}
+
+void AAmmoPickup::MulticastPlayPickupSound_Implementation()
+{
+    UGameplayStatics::PlaySoundAtLocation(this, PickupSound, GetActorLocation());
+}
+
+void AAmmoPickup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(AAmmoPickup, bIsAvailable);
 }

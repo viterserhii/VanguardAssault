@@ -18,6 +18,7 @@ public:
 
 protected:
     virtual void BeginPlay() override;
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
     AActor* GetTargetActor() const { return TargetActor; }
@@ -26,6 +27,10 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void FireAtPlayer();
+
+    UFUNCTION(NetMulticast, Reliable)
+    void MulticastFireAtPlayer();
+    void MulticastFireAtPlayer_Implementation();
 
     void UpdateTurretRotation();
 
