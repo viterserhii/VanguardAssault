@@ -37,7 +37,19 @@ public:
     UFUNCTION()
     void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+    UFUNCTION()
+    void OnRep_IsAvailable();
+
+    UFUNCTION(NetMulticast, Reliable)
+    void MulticastPlayPickupSound();
+
 private:
     void Respawn();
+
+    UPROPERTY(ReplicatedUsing = OnRep_IsAvailable)
+    bool bIsAvailable;
+
     FTimerHandle RespawnTimerHandle;
+
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

@@ -72,6 +72,8 @@ public:
     UPROPERTY(Replicated)
     int32 CurrentAmmo;
 
+    ///////////////////////////////////////////////////
+
 protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;

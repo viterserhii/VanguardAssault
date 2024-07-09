@@ -8,6 +8,7 @@
 #include "Components/Button.h"
 #include "TimerManager.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "HealthComponent.h"
 
 AMyGameMode::AMyGameMode()
 {
@@ -26,13 +27,22 @@ void AMyGameMode::BeginPlay()
 
     PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 
+    if (PlayerPawn)
+    {
+        HealthComponent = PlayerPawn->FindComponentByClass<UHealthComponent>();
+        if (HealthComponent)
+        {
+            HealthComponent->OnRanOutOfHealth.AddDynamic(this, &AMyGameMode::CheckLoseCondition);
+        }
+    }
+
     ShowStartMenu();
 }
 
 void AMyGameMode::PlayAmbientSound()
 {
-        AmbientAudioComponent->SetSound(AmbientSoundCue);
-        AmbientAudioComponent->Play();
+    AmbientAudioComponent->SetSound(AmbientSoundCue);
+    AmbientAudioComponent->Play();
 }
 
 void AMyGameMode::Tick(float DeltaTime)
@@ -125,7 +135,7 @@ void AMyGameMode::CheckLoseCondition()
         return;
     }
 
-    if (!PlayerPawn || PlayerPawn->IsPendingKill())
+    if (!PlayerPawn || (HealthComponent && HealthComponent->GetCurrentHealth() <= 0.0f))
     {
         bIsGameOver = true;
         ShowLoseWidget();

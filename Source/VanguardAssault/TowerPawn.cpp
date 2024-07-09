@@ -1,18 +1,19 @@
 #include "TowerPawn.h"
 #include "GameFramework/Actor.h"
+#include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyGameMode.h"
+#include "TankPawn.h"
 
 ATowerPawn::ATowerPawn()
 {
+    bReplicates = true;
     DetectionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DetectionSphere"));
     DetectionSphere->SetupAttachment(RootComponent);
     DetectionSphere->SetSphereRadius(2000.0f);
-    DetectionSphere->OnComponentBeginOverlap.AddDynamic(this, &ATowerPawn::OnOverlapBegin);
-    DetectionSphere->OnComponentEndOverlap.AddDynamic(this, &ATowerPawn::OnOverlapEnd);
 }
 
 void ATowerPawn::BeginPlay()
@@ -20,51 +21,34 @@ void ATowerPawn::BeginPlay()
     Super::BeginPlay();
 }
 
-void ATowerPawn::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ATowerPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-    if (ATankPawn* Player = Cast<ATankPawn>(OtherActor))
-    {
-        TargetActor = Player;
-        GetWorldTimerManager().SetTimer(UpdateTimerHandle, this, &ATowerPawn::UpdateTurretRotation, UpdateInterval, true);
-        GetWorldTimerManager().SetTimer(FireTimerHandle, this, &ATowerPawn::FireAtPlayer, FireInterval, true);
-    }
-}
-
-void ATowerPawn::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-    if (TargetActor && OtherActor == TargetActor)
-    {
-        GetWorldTimerManager().ClearTimer(UpdateTimerHandle);
-        GetWorldTimerManager().ClearTimer(FireTimerHandle);
-        TargetActor = nullptr;
-    }
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
 
 void ATowerPawn::UpdateTurretRotation()
 {
-    if (TargetActor)
+    if (GetTargetActor())
     {
-            FVector Direction = TargetActor->GetActorLocation() - TurretMesh->GetComponentLocation();
-            Direction.Z = 0;
-            Direction = Direction.RotateAngleAxis(-90.0f, FVector(0.0f, 0.0f, 1.0f));
-            RotateTurret(Direction);
-        }
+        FVector Direction = GetTargetActor()->GetActorLocation() - TurretMesh->GetComponentLocation();
+        Direction.Z = 0;
+        Direction = Direction.RotateAngleAxis(-90.0f, FVector(0.0f, 0.0f, 1.0f));
+        RotateTurret(Direction);
     }
+}
 
 void ATowerPawn::FireAtPlayer()
 {
-
-    AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-
-    if (GameMode && !GameMode->bGameStarted)
+    if (HasAuthority())
     {
-        return;
+        if (GetTargetActor()) {
+            MulticastFireAtPlayer();
+        }
     }
+}
 
-    if (TargetActor)
-    {
+void ATowerPawn::MulticastFireAtPlayer_Implementation()
+{
         if (ProjectileClass)
         {
             FVector SpawnLocation = ProjectileSpawnPoint->GetComponentLocation();
@@ -81,5 +65,4 @@ void ATowerPawn::FireAtPlayer()
 
             AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
         }
-    }
 }

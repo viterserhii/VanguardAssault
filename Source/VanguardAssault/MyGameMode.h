@@ -64,6 +64,7 @@ public:
 
 private:
     APawn* PlayerPawn;
+    class UHealthComponent* HealthComponent;
 
     FTimerHandle RestartTimerHandle;
     FTimerHandle CountdownTimerHandle;
