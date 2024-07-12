@@ -15,34 +15,33 @@ AMyGameMode::AMyGameMode()
     PrimaryActorTick.bCanEverTick = true;
     bIsGameOver = false;
     bGameStarted = false;
-    CountdownTime = 3;
 
     AmbientAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AmbientAudioComponent"));
     AmbientAudioComponent->bAutoActivate = false;
+
+    NumberOfTeams = 4;
 }
 
 void AMyGameMode::BeginPlay()
 {
     Super::BeginPlay();
 
-    PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-
-    if (PlayerPawn)
+    if (HasAuthority())
     {
-        HealthComponent = PlayerPawn->FindComponentByClass<UHealthComponent>();
-        if (HealthComponent)
-        {
-            HealthComponent->OnRanOutOfHealth.AddDynamic(this, &AMyGameMode::CheckLoseCondition);
-        }
-    }
+        APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
-    ShowStartMenu();
+        bGameStarted = true;
+        PlayAmbientSound();
+    }
 }
 
 void AMyGameMode::PlayAmbientSound()
 {
-    AmbientAudioComponent->SetSound(AmbientSoundCue);
-    AmbientAudioComponent->Play();
+    if (HasAuthority())
+    {
+        AmbientAudioComponent->SetSound(AmbientSoundCue);
+        AmbientAudioComponent->Play();
+    }
 }
 
 void AMyGameMode::Tick(float DeltaTime)
@@ -51,63 +50,12 @@ void AMyGameMode::Tick(float DeltaTime)
 
     if (bGameStarted && !bIsGameOver)
     {
-        CheckWinCondition();
-        CheckLoseCondition();
-    }
-}
-
-void AMyGameMode::ShowCountdownWidget()
-{
-    if (CountdownWidgetClass)
-    {
-        CountdownWidget = CreateWidget<UUserWidget>(GetWorld(), CountdownWidgetClass);
-        if (CountdownWidget)
+        if (HasAuthority())
         {
-            CountdownWidget->AddToViewport();
+            CheckWinCondition();
+            CheckLoseCondition();
         }
     }
-}
-
-void AMyGameMode::UpdateCountdown()
-{
-    if (CountdownTime <= 0)
-    {
-        HideCountdownWidget();
-        StartGame();
-        GetWorld()->GetTimerManager().ClearTimer(CountdownTimerHandle);
-        return;
-    }
-
-    if (CountdownWidget)
-    {
-        UTextBlock* CountdownText = Cast<UTextBlock>(CountdownWidget->GetWidgetFromName("CountdownText"));
-        if (CountdownText)
-        {
-            CountdownText->SetText(FText::FromString(FString::FromInt(CountdownTime)));
-        }
-    }
-
-    CountdownTime--;
-}
-
-void AMyGameMode::HideCountdownWidget()
-{
-    if (CountdownWidget)
-    {
-        CountdownWidget->RemoveFromViewport();
-    }
-}
-
-void AMyGameMode::StartGame()
-{
-    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (PlayerController)
-    {
-        PlayerController->bShowMouseCursor = false;
-    }
-
-    bGameStarted = true;
-    PlayAmbientSound();
 }
 
 void AMyGameMode::CheckWinCondition()
@@ -128,21 +76,6 @@ void AMyGameMode::CheckWinCondition()
     }
 }
 
-void AMyGameMode::CheckLoseCondition()
-{
-    if (bIsGameOver)
-    {
-        return;
-    }
-
-    if (!PlayerPawn || (HealthComponent && HealthComponent->GetCurrentHealth() <= 0.0f))
-    {
-        bIsGameOver = true;
-        ShowLoseWidget();
-        GetWorld()->GetTimerManager().SetTimer(RestartTimerHandle, this, &AMyGameMode::RestartGame, 5.0f, false);
-    }
-}
-
 void AMyGameMode::ShowWinWidget()
 {
     if (WinWidgetClass)
@@ -153,6 +86,21 @@ void AMyGameMode::ShowWinWidget()
             WinWidget->AddToViewport();
         }
     }
+}
+
+void AMyGameMode::CheckLoseCondition()
+{
+    //if (bIsGameOver)
+    //{
+    //    return;
+    //}
+
+    //if (!PlayerPawn || (HealthComponent && HealthComponent->GetCurrentHealth() <= 0.0f))
+    //{
+    //    bIsGameOver = true;
+    //    ShowLoseWidget();
+    //    GetWorld()->GetTimerManager().SetTimer(RestartTimerHandle, this, &AMyGameMode::RestartGame, 5.0f, false);
+    //}
 }
 
 void AMyGameMode::ShowLoseWidget()
@@ -167,76 +115,24 @@ void AMyGameMode::ShowLoseWidget()
     }
 }
 
-void AMyGameMode::StartGameWithDelay()
+void AMyGameMode::RestartGame()
 {
-    if (PlayerPawn)
+    if (HasAuthority())
     {
-        PlayerPawn->SetActorHiddenInGame(false);
-    }
-    if (StartMenuWidget)
-    {
-        StartMenuWidget->RemoveFromViewport();
-    }
-
-    ShowCountdownWidget();
-
-    GetWorld()->GetTimerManager().SetTimer(CountdownTimerHandle, this, &AMyGameMode::UpdateCountdown, 1.0f, true);
-
-    ATankPawn* TankPawn = Cast<ATankPawn>(PlayerPawn);
-    if (TankPawn)
-    {
-        TankPawn->PlayEngineSound();
-    }
-
-    AMyGameHUD* HUD = Cast<AMyGameHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
-    if (HUD)
-    {
-        HUD->ShowHUD();
+        UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
     }
 }
 
-
-void AMyGameMode::ShowStartMenu()
+void AMyGameMode::ChangeTeam(int32 TeamNumber)
 {
     APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
     if (PlayerController)
     {
-        PlayerController->bShowMouseCursor = true;
-    }
-
-    if (PlayerPawn)
-    {
-        PlayerPawn->SetActorHiddenInGame(true);
-    }
-
-    if (StartMenuWidgetClass)
-    {
-        StartMenuWidget = CreateWidget<UUserWidget>(GetWorld(), StartMenuWidgetClass);
-        if (StartMenuWidget)
+        ATankPawn* PlayerTank = Cast<ATankPawn>(PlayerController->GetPawn());
+        if (PlayerTank)
         {
-            StartMenuWidget->AddToViewport();
-
-            UButton* StartButton = Cast<UButton>(StartMenuWidget->GetWidgetFromName("StartButton"));
-            UButton* ExitButton = Cast<UButton>(StartMenuWidget->GetWidgetFromName("ExitButton"));
-            if (StartButton)
-            {
-                StartButton->OnClicked.AddDynamic(this, &AMyGameMode::StartGameWithDelay);
-            }
-            if (ExitButton)
-            {
-                ExitButton->OnClicked.AddDynamic(this, &AMyGameMode::QuitGame);
-            }
+            int32 ClampedTeam = FMath::Clamp(TeamNumber, 1, NumberOfTeams);
+            PlayerTank->SetTeam(ClampedTeam);
         }
     }
-}
-
-void AMyGameMode::QuitGame()
-{
-    UKismetSystemLibrary::QuitGame(GetWorld(), UGameplayStatics::GetPlayerController(GetWorld(), 0), EQuitPreference::Quit, true);
-}
-
-void AMyGameMode::RestartGame()
-{
-    UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
-    ShowStartMenu();
 }

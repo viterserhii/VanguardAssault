@@ -11,13 +11,6 @@
 #include "Components/AudioComponent.h"
 #include "TurretPawn.generated.h"
 
-UENUM(BlueprintType)
-enum class ETeamColor : uint8
-{
-    GreenTeam UMETA(DisplayName = "GreenTeam"),
-    RedTeam   UMETA(DisplayName = "RedTeam"),
-};
-
 UCLASS()
 class VANGUARDASSAULT_API ATurretPawn : public APawn
 {
@@ -49,7 +42,10 @@ public:
     USceneComponent* ProjectileSpawnPoint;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Materials")
-    ETeamColor TeamColor;
+    int32 TeamColor;
+
+    UFUNCTION(BlueprintCallable, Category = "Team")
+    void SetTeam(int32 NewTeam);
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     UHealthComponent* HealthComponent;
@@ -87,6 +83,8 @@ private:
     UPROPERTY(ReplicatedUsing = OnRep_TurretRotation)
     FRotator ReplicatedTurretRotation;
 
+    void UpdateMaterialColors();
     void UpdateMaterialColor(UStaticMeshComponent* Mesh, int32 MaterialSlot);
-    FLinearColor GetColorForTeam(ETeamColor Team) const;
+    FLinearColor GetColorForTeam(int32 Team) const;
+
 };
