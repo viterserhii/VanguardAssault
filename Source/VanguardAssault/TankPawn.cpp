@@ -62,7 +62,7 @@ ATankPawn::ATankPawn()
     TurnSpeed = 30.0f;
 
     LastReplicatedTime = 0.0f;
-    ReplicationInterval = 0.1f;
+    ReplicationInterval = 0.05f;
 
     TeamColor = 1;
 }
@@ -115,25 +115,29 @@ void ATankPawn::Tick(float DeltaTime)
     }
     else
     {
-        PredictMovement(DeltaTime, MoveForwardValue, TurnRightValue);
+        PredictMovement(DeltaTime);
 
-        FVector NewLocation = FMath::VInterpTo(GetActorLocation(), this->PredictedPosition, DeltaTime, 5.0f);
-        FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), this->PredictedRotation, DeltaTime, 5.0f);
+        FVector NewLocation = FMath::VInterpTo(GetActorLocation(), PredictedPosition, DeltaTime, 10.0f);
+        FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), PredictedRotation, DeltaTime, 10.0f);
 
         SetActorLocation(NewLocation);
         SetActorRotation(NewRotation);
 
-        FVector CorrectedLocation = FMath::VInterpTo(NewLocation, ReplicatedPosition, DeltaTime, 2.5f);
-        FRotator CorrectedRotation = FMath::RInterpTo(NewRotation, ReplicatedRotation, DeltaTime, 2.5f);
+        FVector CorrectedLocation = FMath::VInterpTo(NewLocation, ReplicatedPosition, DeltaTime, 5.0f);
+        FRotator CorrectedRotation = FMath::RInterpTo(NewRotation, ReplicatedRotation, DeltaTime, 5.0f);
 
         SetActorLocation(CorrectedLocation);
         SetActorRotation(CorrectedRotation);
     }
+}
 
-    //if (!HasAuthority())
-    //{
-    //    UpdateEffects();
-    //}
+void ATankPawn::PredictMovement(float DeltaTime)
+{
+    FVector DeltaLocation = FVector(CurrentAcceleration * 1200.0f * DeltaTime, 0.f, 0.f);
+    PredictedPosition += DeltaLocation;
+
+    FRotator DeltaRotation = FRotator(0.f, TurnRightValue * TurnSpeed * DeltaTime, 0.f);
+    PredictedRotation += DeltaRotation;
 }
 
 void ATankPawn::MoveForward(float Value)
@@ -160,38 +164,34 @@ void ATankPawn::UpdateMovement(float DeltaTime)
     AddActorLocalOffset(DeltaLocation, true);
 
     ReplicatedPosition = GetActorLocation();
-}
+    PredictedPosition = ReplicatedPosition;
 
-//void ATankPawn::UpdateEffects()
-//{
-//    bool bIsMoving = CurrentAcceleration > 0.1f;
-//
-//    if (bIsMoving)
-//    {
-//        if (!LeftDustEffect1->IsActive()) LeftDustEffect1->Activate();
-//        if (!LeftDustEffect2->IsActive()) LeftDustEffect2->Activate();
-//        if (!RightDustEffect1->IsActive()) RightDustEffect1->Activate();
-//        if (!RightDustEffect2->IsActive()) RightDustEffect2->Activate();
-//
-//        if (TreadSoundCue && !TreadAudioComponent->IsPlaying())
-//        {
-//            TreadAudioComponent->SetSound(TreadSoundCue);
-//            TreadAudioComponent->Play();
-//        }
-//    }
-//    else
-//    {
-//        if (LeftDustEffect1->IsActive()) LeftDustEffect1->Deactivate();
-//        if (LeftDustEffect2->IsActive()) LeftDustEffect2->Deactivate();
-//        if (RightDustEffect1->IsActive()) RightDustEffect1->Deactivate();
-//        if (RightDustEffect2->IsActive()) RightDustEffect2->Deactivate();
-//
-//        if (TreadAudioComponent->IsPlaying())
-//        {
-//            TreadAudioComponent->Stop();
-//        }
-//    }
-//}
+    if (FMath::Abs(CurrentAcceleration) > 0.1f)
+    {
+        if (!LeftDustEffect1->IsActive()) LeftDustEffect1->Activate();
+        if (!LeftDustEffect2->IsActive()) LeftDustEffect2->Activate();
+        if (!RightDustEffect1->IsActive()) RightDustEffect1->Activate();
+        if (!RightDustEffect2->IsActive()) RightDustEffect2->Activate();
+
+        if (TreadSoundCue && !TreadAudioComponent->IsPlaying())
+        {
+            TreadAudioComponent->SetSound(TreadSoundCue);
+            TreadAudioComponent->Play();
+        }
+    }
+    else
+    {
+        if (LeftDustEffect1->IsActive()) LeftDustEffect1->Deactivate();
+        if (LeftDustEffect2->IsActive()) LeftDustEffect2->Deactivate();
+        if (RightDustEffect1->IsActive()) RightDustEffect1->Deactivate();
+        if (RightDustEffect2->IsActive()) RightDustEffect2->Deactivate();
+
+        if (TreadAudioComponent->IsPlaying())
+        {
+            TreadAudioComponent->Stop();
+        }
+    }
+}
 
 void ATankPawn::TurnRight(float Value)
 {
@@ -210,6 +210,7 @@ void ATankPawn::ServerTurnRight_Implementation(float Value)
         AddActorLocalRotation(DeltaRotation);
 
         ReplicatedRotation = GetActorRotation();
+        PredictedRotation = ReplicatedRotation;
     }
 }
 
@@ -220,13 +221,11 @@ bool ATankPawn::ServerTurnRight_Validate(float Value)
 
 void ATankPawn::OnRep_Position()
 {
-    ClientPosition = ReplicatedPosition;
     PredictedPosition = ReplicatedPosition;
 }
 
 void ATankPawn::OnRep_Rotation()
 {
-    ClientRotation = ReplicatedRotation;
     PredictedRotation = ReplicatedRotation;
 }
 
@@ -236,15 +235,6 @@ void ATankPawn::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifet
 
     DOREPLIFETIME(ATankPawn, ReplicatedPosition);
     DOREPLIFETIME(ATankPawn, ReplicatedRotation);
-}
-
-void ATankPawn::PredictMovement(float DeltaTime, float MoveValue, float TurnValue)
-{
-    FVector DeltaLocation = FVector(MoveValue * 1200.0f * DeltaTime, 0.f, 0.f);
-    PredictedPosition += DeltaLocation;
-
-    FRotator DeltaRotation(0.f, TurnValue * TurnSpeed * DeltaTime, 0.f);
-    PredictedRotation += DeltaRotation;
 }
 
 void ATankPawn::Fire()

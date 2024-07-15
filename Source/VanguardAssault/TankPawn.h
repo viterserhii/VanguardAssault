@@ -33,8 +33,7 @@ public:
 
     void MoveForward(float Value);
     void UpdateMovement(float DeltaTime);
-    //void UpdateEffects();
-    void PredictMovement(float DeltaTime, float MoveValue, float TurnValue);
+    void PredictMovement(float DeltaTime);
 
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerMoveForward(float Value);
