@@ -38,23 +38,11 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> LoseWidgetClass;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-    TSubclassOf<UUserWidget> CountdownWidgetClass;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-    TSubclassOf<UUserWidget> StartMenuWidgetClass;
-
     UPROPERTY()
     UUserWidget* WinWidget;
 
     UPROPERTY()
     UUserWidget* LoseWidget;
-
-    UPROPERTY()
-    UUserWidget* CountdownWidget;
-
-    UPROPERTY()
-    UUserWidget* StartMenuWidget;
 
     UPROPERTY(EditAnywhere, Category = "Sound")
     USoundCue* AmbientSoundCue;
@@ -62,33 +50,19 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound", meta = (AllowPrivateAccess = "true"))
     UAudioComponent* AmbientAudioComponent;
 
+    UFUNCTION(Exec)
+    void ChangeTeam(int32 TeamNumber);
+
 private:
     APawn* PlayerPawn;
     class UHealthComponent* HealthComponent;
 
     FTimerHandle RestartTimerHandle;
-    FTimerHandle CountdownTimerHandle;
-
-    int32 CountdownTime;
 
     void ShowWinWidget();
     void ShowLoseWidget();
-    void ShowCountdownWidget();
-    void UpdateCountdown();
-    void HideCountdownWidget();
     void RestartGame();
-
-    UFUNCTION()
-    void StartGame();
-
-    UFUNCTION()
-    void StartGameWithDelay();
-
-    UFUNCTION()
-    void ShowStartMenu();
-
-    UFUNCTION()
-    void QuitGame();
-
     void PlayAmbientSound();
+
+    int32 NumberOfTeams; 
 };

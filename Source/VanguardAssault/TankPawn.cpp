@@ -63,6 +63,8 @@ ATankPawn::ATankPawn()
 
     LastReplicatedTime = 0.0f;
     ReplicationInterval = 0.1f;
+
+    TeamColor = 1;
 }
 
 void ATankPawn::BeginPlay()

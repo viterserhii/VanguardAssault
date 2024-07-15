@@ -50,11 +50,17 @@ void ATurretPawn::Tick(float DeltaTime)
 void ATurretPawn::BeginPlay()
 {
     Super::BeginPlay();
+    UpdateMaterialColors();
 }
 
 void ATurretPawn::PostInitializeComponents()
 {
     Super::PostInitializeComponents();
+    UpdateMaterialColors();
+}
+
+void ATurretPawn::UpdateMaterialColors()
+{
     UpdateMaterialColor(BaseMesh, 1);
     UpdateMaterialColor(TurretMesh, 1);
 }
@@ -73,13 +79,6 @@ void ATurretPawn::RotateTurret(FVector TargetDirection)
 {
     if (HasAuthority())
     {
-        //AMyGameMode* GameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-
-        //if (GameMode && !GameMode->bGameStarted)
-        //{
-        //    return;
-        //}
-
         FRotator CurrentRotation = TurretMesh->GetComponentRotation();
         FRotator TargetRotation = FRotationMatrix::MakeFromX(TargetDirection).Rotator();
 
@@ -142,14 +141,29 @@ void ATurretPawn::Server_RotateTurret_Implementation(FVector TargetDirection)
     RotateTurret(TargetDirection);
 }
 
-FLinearColor ATurretPawn::GetColorForTeam(ETeamColor Team) const
+void ATurretPawn::SetTeam(int32 NewTeam)
+{
+    if (TeamColor != NewTeam)
+    {
+        TeamColor = NewTeam;
+        UpdateMaterialColors();
+
+        UE_LOG(LogTemp, Warning, TEXT("Team changed to: %d"), NewTeam);
+    }
+}
+
+FLinearColor ATurretPawn::GetColorForTeam(int32 Team) const
 {
     switch (Team)
     {
-    case ETeamColor::GreenTeam:
+    case 1:
         return FLinearColor::Green;
-    case ETeamColor::RedTeam:
+    case 2:
         return FLinearColor::Red;
+    case 3:
+        return FLinearColor::Blue;
+    case 4:
+        return FLinearColor::Yellow;
     default:
         return FLinearColor::White;
     }

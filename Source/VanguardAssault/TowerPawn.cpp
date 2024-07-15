@@ -14,6 +14,8 @@ ATowerPawn::ATowerPawn()
     DetectionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DetectionSphere"));
     DetectionSphere->SetupAttachment(RootComponent);
     DetectionSphere->SetSphereRadius(2000.0f);
+
+    TeamColor = 2;
 }
 
 void ATowerPawn::BeginPlay()
