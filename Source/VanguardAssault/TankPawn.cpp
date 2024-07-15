@@ -117,14 +117,14 @@ void ATankPawn::Tick(float DeltaTime)
     {
         PredictMovement(DeltaTime, MoveForwardValue, TurnRightValue);
 
-        FVector NewLocation = FMath::VInterpTo(GetActorLocation(), this->PredictedPosition, DeltaTime, 10.0f);
-        FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), this->PredictedRotation, DeltaTime, 10.0f);
+        FVector NewLocation = FMath::VInterpTo(GetActorLocation(), this->PredictedPosition, DeltaTime, 5.0f);
+        FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), this->PredictedRotation, DeltaTime, 5.0f);
 
         SetActorLocation(NewLocation);
         SetActorRotation(NewRotation);
 
-        FVector CorrectedLocation = FMath::VInterpTo(NewLocation, ReplicatedPosition, DeltaTime, 5.0f);
-        FRotator CorrectedRotation = FMath::RInterpTo(NewRotation, ReplicatedRotation, DeltaTime, 5.0f);
+        FVector CorrectedLocation = FMath::VInterpTo(NewLocation, ReplicatedPosition, DeltaTime, 2.5f);
+        FRotator CorrectedRotation = FMath::RInterpTo(NewRotation, ReplicatedRotation, DeltaTime, 2.5f);
 
         SetActorLocation(CorrectedLocation);
         SetActorRotation(CorrectedRotation);
