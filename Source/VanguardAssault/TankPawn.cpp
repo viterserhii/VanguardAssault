@@ -62,7 +62,7 @@ ATankPawn::ATankPawn()
     TurnSpeed = 30.0f;
 
     LastReplicatedTime = 0.0f;
-    ReplicationInterval = 0.1f;
+    ReplicationInterval = 0.05f;
 
     TeamColor = 1;
 }
@@ -115,13 +115,34 @@ void ATankPawn::Tick(float DeltaTime)
     }
     else
     {
-        SetActorLocation(FMath::VInterpTo(GetActorLocation(), ReplicatedPosition, DeltaTime, 5.0f));
-        SetActorRotation(FMath::RInterpTo(GetActorRotation(), ReplicatedRotation, DeltaTime, 5.0f));
+        PredictMovement(DeltaTime);
+
+        FVector NewLocation = FMath::VInterpTo(GetActorLocation(), PredictedPosition, DeltaTime, 10.0f);
+        FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), PredictedRotation, DeltaTime, 10.0f);
+
+        SetActorLocation(NewLocation);
+        SetActorRotation(NewRotation);
+
+        FVector CorrectedLocation = FMath::VInterpTo(NewLocation, ReplicatedPosition, DeltaTime, 5.0f);
+        FRotator CorrectedRotation = FMath::RInterpTo(NewRotation, ReplicatedRotation, DeltaTime, 5.0f);
+
+        SetActorLocation(CorrectedLocation);
+        SetActorRotation(CorrectedRotation);
     }
+}
+
+void ATankPawn::PredictMovement(float DeltaTime)
+{
+    FVector DeltaLocation = FVector(CurrentAcceleration * 1200.0f * DeltaTime, 0.f, 0.f);
+    PredictedPosition += DeltaLocation;
+
+    FRotator DeltaRotation = FRotator(0.f, TurnRightValue * TurnSpeed * DeltaTime, 0.f);
+    PredictedRotation += DeltaRotation;
 }
 
 void ATankPawn::MoveForward(float Value)
 {
+    MoveForwardValue = Value;
     ServerMoveForward(Value);
 }
 
@@ -143,6 +164,7 @@ void ATankPawn::UpdateMovement(float DeltaTime)
     AddActorLocalOffset(DeltaLocation, true);
 
     ReplicatedPosition = GetActorLocation();
+    PredictedPosition = ReplicatedPosition;
 
     if (FMath::Abs(CurrentAcceleration) > 0.1f)
     {
@@ -173,6 +195,7 @@ void ATankPawn::UpdateMovement(float DeltaTime)
 
 void ATankPawn::TurnRight(float Value)
 {
+    TurnRightValue = Value;
     if (Value != 0.0f)
     {
         ServerTurnRight(Value);
@@ -187,6 +210,7 @@ void ATankPawn::ServerTurnRight_Implementation(float Value)
         AddActorLocalRotation(DeltaRotation);
 
         ReplicatedRotation = GetActorRotation();
+        PredictedRotation = ReplicatedRotation;
     }
 }
 
@@ -197,12 +221,12 @@ bool ATankPawn::ServerTurnRight_Validate(float Value)
 
 void ATankPawn::OnRep_Position()
 {
-    ClientPosition = ReplicatedPosition;
+    PredictedPosition = ReplicatedPosition;
 }
 
 void ATankPawn::OnRep_Rotation()
 {
-    ClientRotation = ReplicatedRotation;
+    PredictedRotation = ReplicatedRotation;
 }
 
 void ATankPawn::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const

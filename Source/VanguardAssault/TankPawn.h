@@ -33,6 +33,7 @@ public:
 
     void MoveForward(float Value);
     void UpdateMovement(float DeltaTime);
+    void PredictMovement(float DeltaTime);
 
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerMoveForward(float Value);
@@ -44,7 +45,15 @@ public:
 
     float CurrentAcceleration;
     float AccelerationDuration;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float TurnSpeed;
+
+    float MoveForwardValue;
+    float TurnRightValue;
+
+    FVector PredictedPosition;
+    FRotator PredictedRotation;
 
     ///////////////////////////////////////////////////
 
